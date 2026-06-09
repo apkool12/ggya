@@ -52,7 +52,7 @@ export default function ByteBanner() {
             fontSize: '0.65rem',
             fontWeight: 700,
             background: COLORS.accent,
-            '&:hover': { background: '#27272A' },
+            '&:hover': { background: COLORS.accentSoft },
           }}
         >
           디버깅 신청

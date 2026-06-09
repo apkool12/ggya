@@ -22,34 +22,35 @@ export const STORAGE_KEYS = {
   shuffleMarker: 'ow_auction_players_shuffled',
 } as const;
 
+// e스포츠 방송 톤 다크 팔레트
 export const COLORS = {
-  surfaceBg: '#F6F7F9',
-  panelBg: '#FFFFFF',
-  panelBgStrong: '#F1F3F5',
-  panelBgMuted: '#E5E7EB',
-  panelBgElevated: '#FFFFFF',
+  surfaceBg: '#0B0F1A',
+  panelBg: '#141A2A',
+  panelBgStrong: '#1C2436',
+  panelBgMuted: '#2A3348',
+  panelBgElevated: '#1A2133',
 
-  accent: '#111827',
-  accentSoft: '#374151',
-  accentMuted: '#E8EEF7',
+  accent: '#6D63FF',
+  accentSoft: '#8B82FF',
+  accentMuted: '#232A42',
 
-  textPrimary: '#111827',
-  textMuted: '#6B7280',
+  textPrimary: '#EEF2F8',
+  textMuted: '#93A0B8',
   textOnAccent: '#FFFFFF',
 
-  danger: '#E11D48',
-  dangerSoft: '#FFF1F2',
-  success: '#059669',
-  successSoft: '#ECFDF5',
-  warning: '#D97706',
-  warningSoft: '#FFFBEB',
-  border: '#E5E7EB',
-  borderStrong: '#D1D5DB',
-  shadow: '0 18px 45px rgba(17, 24, 39, 0.08)',
-  shadowSoft: '0 10px 24px rgba(17, 24, 39, 0.05)',
+  danger: '#FF5470',
+  dangerSoft: 'rgba(255, 84, 112, 0.16)',
+  success: '#34D399',
+  successSoft: 'rgba(52, 211, 153, 0.16)',
+  warning: '#FBBF24',
+  warningSoft: 'rgba(251, 191, 36, 0.16)',
+  border: '#28304A',
+  borderStrong: '#3B4760',
+  shadow: '0 20px 50px rgba(0, 0, 0, 0.55)',
+  shadowSoft: '0 10px 26px rgba(0, 0, 0, 0.38)',
 
-  highlight: '#DBEAFE',
-  highlightStrong: '#BFDBFE',
+  highlight: 'rgba(109, 99, 255, 0.18)',
+  highlightStrong: 'rgba(109, 99, 255, 0.55)',
 } as const;
 
 import type { SxProps, Theme } from '@mui/material/styles';

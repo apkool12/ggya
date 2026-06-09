@@ -46,8 +46,8 @@ const LOG_RULES: Array<{
   {
     match: (log) => log.startsWith('❌') || log.startsWith('⚠️'),
     strip: /❌|⚠️/g,
-    icon: <ErrorIcon sx={{ fontSize: '0.85rem', color: COLORS.dangerSoft }} />,
-    color: COLORS.dangerSoft,
+    icon: <ErrorIcon sx={{ fontSize: '0.85rem', color: COLORS.danger }} />,
+    color: COLORS.danger,
   },
   {
     match: (log) => log.startsWith('👉') || log.startsWith('📢'),

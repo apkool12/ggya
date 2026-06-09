@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Alert, Box, Button, TextField, Typography } from '@mui/material';
 import { useAuth } from '@/auth/AuthContext';
+import { COLORS } from '@/auction/constants';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -35,7 +36,8 @@ export default function LoginPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(180deg, #0B0F1A 0%, #111827 100%)',
+        background:
+          'radial-gradient(900px 500px at 50% -10%, rgba(109,99,255,0.18) 0%, rgba(109,99,255,0) 60%), linear-gradient(180deg, #0B0F1A 0%, #0A0E18 100%)',
         p: 2,
       }}
     >
@@ -50,8 +52,9 @@ export default function LoginPage() {
           gap: 2,
           p: 4,
           borderRadius: 3,
-          background: '#FFFFFF',
-          boxShadow: '0 24px 60px rgba(0,0,0,0.35)',
+          background: COLORS.panelBg,
+          border: `1px solid ${COLORS.border}`,
+          boxShadow: '0 24px 60px rgba(0,0,0,0.55)',
         }}
       >
         <Box>

@@ -28,7 +28,7 @@ export default function AuctionDashboard() {
           minHeight: '100svh',
           height: { xs: 'auto', lg: '100svh' },
           background:
-            'linear-gradient(180deg, #F9FAFB 0%, #F3F4F6 44%, #EEF2F7 100%)',
+            'radial-gradient(1200px 600px at 70% -10%, rgba(109,99,255,0.12) 0%, rgba(109,99,255,0) 60%), linear-gradient(180deg, #0B0F1A 0%, #0C111E 50%, #0A0E18 100%)',
           overflow: { xs: 'auto', lg: 'hidden' },
           p: { xs: 1, md: 1.5 },
           position: 'relative',
@@ -69,7 +69,7 @@ export default function AuctionDashboard() {
               display: 'grid',
               gridTemplateRows: {
                 xs: 'auto auto auto auto',
-                lg: '88px 206px minmax(128px, 1fr) 164px',
+                lg: '84px 200px minmax(96px, 1fr) auto',
               },
               minHeight: 0,
               gap: 1.25,
