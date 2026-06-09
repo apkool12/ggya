@@ -1,0 +1,224 @@
+'use client';
+
+import { memo, useCallback } from 'react';
+import { Avatar, Box, Typography } from '@mui/material';
+import { COLORS, panelSx } from '../constants';
+import type { Player, PlayerStatus } from '../types';
+import { useAuctionContext } from '../AuctionContext';
+
+interface PlayerCellProps {
+  player: Player;
+  index: number;
+  onSelect: (player: Player) => void;
+}
+
+const CELL_BG: Record<PlayerStatus, string> = {
+  대기중: COLORS.panelBgStrong,
+  경매중: COLORS.highlight,
+  낙찰완료: COLORS.panelBgMuted,
+  유찰: COLORS.dangerSoft,
+};
+
+const PlayerCell = memo(function PlayerCell({ player, index, onSelect }: PlayerCellProps) {
+  const isLocked = player.status === '낙찰완료' || player.status === '유찰';
+  const isActive = player.status === '경매중';
+
+  const handleClick = useCallback(() => {
+    if (!isLocked) onSelect(player);
+  }, [isLocked, onSelect, player]);
+
+  return (
+    <Box
+      onClick={handleClick}
+      sx={{
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 0.55,
+        py: 0.45,
+        minHeight: 76,
+        background: isActive ? CELL_BG[player.status] : 'transparent',
+        border: `1px solid ${isActive ? COLORS.highlightStrong : 'transparent'}`,
+        borderRadius: 1.5,
+        cursor: isLocked ? 'default' : 'pointer',
+        opacity: isLocked ? 0.5 : 1,
+        transition: 'background-color 0.15s',
+        '&:hover': isLocked ? {} : { background: COLORS.highlight },
+      }}
+    >
+      <Typography
+        variant="caption"
+        sx={{
+          position: 'absolute',
+          top: 2,
+          left: 4,
+          fontWeight: 800,
+          fontSize: '0.55rem',
+          color: COLORS.textMuted,
+        }}
+      >
+        {index + 1}
+      </Typography>
+      <Avatar
+        src={player.avatar}
+        variant="rounded"
+        sx={{
+          width: 42,
+          height: 42,
+          border: `1px solid ${isActive ? COLORS.highlightStrong : COLORS.border}`,
+          boxShadow: '0 2px 8px rgba(17, 24, 39, 0.12)',
+        }}
+      />
+      <Typography
+        variant="caption"
+        sx={{
+          fontWeight: 800,
+          color: COLORS.textPrimary,
+          fontSize: '0.68rem',
+          textAlign: 'center',
+          width: '100%',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          fontFamily: 'Pretendard, sans-serif',
+        }}
+      >
+        {player.name}
+      </Typography>
+      <Typography
+        variant="caption"
+        sx={{
+          display: 'none',
+          fontSize: '0.5rem',
+          color: isActive ? COLORS.textPrimary : COLORS.textMuted,
+          fontWeight: 700,
+          fontFamily: 'Pretendard, sans-serif',
+        }}
+      >
+        {player.status === '낙찰완료' && `${player.cost}P`}
+        {player.status === '유찰' && '유찰'}
+        {player.status === '대기중' && '대기'}
+        {isActive && '진행'}
+      </Typography>
+    </Box>
+  );
+});
+
+export default function PlayerGrid() {
+  const { players, activePlayer, nextPlayer, waitingCount, selectPlayer } =
+    useAuctionContext();
+  const playerRows = Array.from({ length: Math.ceil(players.length / 4) }, (_, rowIndex) =>
+    players.slice(rowIndex * 4, rowIndex * 4 + 4),
+  );
+
+  return (
+    <Box
+      sx={{
+        p: 1.35,
+        ...panelSx,
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0,
+        overflow: 'hidden',
+      }}
+    >
+      <Box
+        sx={{
+          pb: 0.9,
+          mb: 0.9,
+          borderBottom: `1px solid ${COLORS.border}`,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        {activePlayer ? (
+          <Typography sx={{ fontWeight: 800, fontSize: '0.75rem', fontFamily: 'Pretendard, sans-serif' }}>
+            <Box component="span" sx={{ color: COLORS.textPrimary }}>
+              {activePlayer.name}
+            </Box>
+            {nextPlayer && (
+              <Box component="span" sx={{ color: COLORS.textMuted, ml: 1 }}>
+                → {nextPlayer.name}
+              </Box>
+            )}
+          </Typography>
+        ) : (
+          <Typography
+            sx={{ fontWeight: 800, fontSize: '0.8rem', fontFamily: 'Pretendard, sans-serif' }}
+          >
+            경매 대기 명단
+          </Typography>
+        )}
+        <Typography
+          sx={{
+            fontSize: '0.7rem',
+            fontWeight: 800,
+            color: COLORS.textMuted,
+            fontFamily: 'Pretendard, sans-serif',
+          }}
+        >
+          대기 {waitingCount}명
+        </Typography>
+      </Box>
+
+      <Box sx={{ flexGrow: 1, overflowY: 'auto', pr: 0.5 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
+          {playerRows.map((row, rowIndex) => (
+            <Box
+              key={row.map((player) => player.id).join('-')}
+              sx={{
+                display: 'grid',
+                gridTemplateColumns:
+                  'minmax(58px, 1fr) 28px minmax(58px, 1fr) 28px minmax(58px, 1fr) 28px minmax(58px, 1fr)',
+                alignItems: 'center',
+                gap: 0.8,
+                py: 0.65,
+                borderBottom:
+                  rowIndex < playerRows.length - 1 ? `1px solid ${COLORS.border}` : 'none',
+              }}
+            >
+              {[0, 1, 2, 3].map((slotIndex) => {
+                const player = row[slotIndex];
+                const playerIndex = rowIndex * 4 + slotIndex;
+                return (
+                  <Box
+                    key={slotIndex}
+                    sx={{
+                      display: 'contents',
+                    }}
+                  >
+                    {player ? (
+                      <PlayerCell
+                        player={player}
+                        index={playerIndex}
+                        onSelect={selectPlayer}
+                      />
+                    ) : (
+                      <Box />
+                    )}
+                    {slotIndex < 3 && row[slotIndex + 1] && (
+                      <Box
+                        sx={{
+                          width: 0,
+                          height: 0,
+                          borderTop: '6px solid transparent',
+                          borderBottom: '6px solid transparent',
+                          borderLeft: `9px solid ${COLORS.accentSoft}`,
+                          opacity: player ? 0.65 : 0,
+                          justifySelf: 'center',
+                        }}
+                      />
+                    )}
+                  </Box>
+                );
+              })}
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
