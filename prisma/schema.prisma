@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  LEADER
+}
+
+enum PlayerRole {
+  TANK
+  DPS
+  SUPPORT
+}
+
+enum PlayerStatus {
+  WAITING
+  ACTIVE
+  SOLD
+  UNSOLD
+}
+
+enum AuctionPhase {
+  IDLE
+  BIDDING
+  AWAITING_CONFIRM
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  role         Role
+  team         Team?    @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  teamId       String?  @unique
+  createdAt    DateTime @default(now())
+}
+
+model Team {
+  id             String   @id @default(cuid())
+  name           String
+  leaderName     String
+  avatarUrl      String
+  startingPoints Int      @default(1000)
+  points         Int      @default(1000)
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  leaderAccount  User?
+  roster         Player[]
+}
+
+model Player {
+  id        String       @id @default(cuid())
+  name      String
+  role      PlayerRole
+  avatarUrl String
+  status    PlayerStatus @default(WAITING)
+  cost      Int?
+  team      Team?        @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  teamId    String?
+  slotIndex Int?
+  order     Int          @default(0)
+  mostPicks String[]     @default([])
+}
+
+model AuctionState {
+  id                  Int          @id @default(1)
+  phase               AuctionPhase @default(IDLE)
+  activePlayerId      String?
+  currentBid          Int          @default(0)
+  highestBidderTeamId String?
+  bidDeadline         DateTime?
+  updatedAt           DateTime     @updatedAt
+}
+
+model LogEntry {
+  id        Int      @id @default(autoincrement())
+  message   String
+  createdAt DateTime @default(now())
+}
