@@ -72,6 +72,7 @@ export interface AuctionApi {
   waitingCount: number;
   unsoldPlayers: Player[];
   selectPlayer: (playerId: string) => Promise<ActionResult>;
+  drawPlayer: () => Promise<ActionResult>;
   placeBid: (teamId: string, amount: number) => Promise<ActionResult>;
   confirmWin: () => Promise<ActionResult>;
   markUnsold: () => Promise<ActionResult>;
@@ -165,6 +166,7 @@ export function useAuction(): AuctionApi {
     (playerId: string) => post('/api/auction/select', { playerId }),
     [post],
   );
+  const drawPlayer = useCallback(() => post('/api/auction/draw'), [post]);
   const placeBid = useCallback(
     (teamId: string, amount: number) => post('/api/auction/bid', { teamId, amount }),
     [post],
@@ -186,6 +188,7 @@ export function useAuction(): AuctionApi {
     waitingCount,
     unsoldPlayers,
     selectPlayer,
+    drawPlayer,
     placeBid,
     confirmWin,
     markUnsold,

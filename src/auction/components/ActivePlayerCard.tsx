@@ -1,11 +1,88 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { Box, Typography } from '@mui/material';
-import { SportsEsports } from '@mui/icons-material';
+import { Casino, SportsEsports } from '@mui/icons-material';
 import { AnimatePresence, motion } from 'framer-motion';
 import { COLORS, ROLE_COLORS_KO } from '../constants';
 import { getRoleIcon } from '../log-utils';
 import { useAuctionContext } from '../AuctionContext';
+import type { Player } from '../types';
+
+const ROULETTE_MS = 1300;
+
+function RouletteOverlay({ pool }: { pool: Player[] }) {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setIdx((i) => i + 1), 75);
+    return () => window.clearInterval(id);
+  }, []);
+  const p = pool.length ? pool[idx % pool.length] : null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        background: 'rgba(20, 15, 11, 0.92)',
+        zIndex: 5,
+        borderRadius: 8,
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.6,
+          color: COLORS.accent,
+          fontWeight: 900,
+          fontSize: '0.8rem',
+          letterSpacing: 2,
+          fontFamily: 'Pretendard, sans-serif',
+        }}
+      >
+        <Casino sx={{ fontSize: '1rem' }} /> 랜덤 추첨 중…
+      </Box>
+      <Box
+        sx={{
+          width: 96,
+          height: 96,
+          borderRadius: 2,
+          overflow: 'hidden',
+          border: `3px solid ${COLORS.accent}`,
+          boxShadow: `0 0 30px ${COLORS.highlightStrong}`,
+        }}
+      >
+        {p && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={p.avatar}
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        )}
+      </Box>
+      <Typography
+        sx={{
+          fontWeight: 900,
+          fontSize: '1.3rem',
+          color: COLORS.textPrimary,
+          fontFamily: 'Pretendard, sans-serif',
+        }}
+      >
+        {p?.name ?? '...'}
+      </Typography>
+    </motion.div>
+  );
+}
 
 type KoRole = '탱커' | '딜러' | '힐러';
 const roleColorOf = (role: string) =>
@@ -340,8 +417,24 @@ function ActiveBody({
 }
 
 export default function ActivePlayerCard() {
-  const { activePlayer, currentBid, highestBidder, phase } = useAuctionContext();
+  const { activePlayer, currentBid, highestBidder, phase, players } = useAuctionContext();
   const awaiting = phase === 'AWAITING_CONFIRM';
+
+  // 활성 선수가 새로 정해지면 모든 화면에서 잠깐 룰렛 연출
+  const [spinning, setSpinning] = useState(false);
+  const prevId = useRef<string | null>(null);
+  useEffect(() => {
+    const id = activePlayer?.id ?? null;
+    if (id && id !== prevId.current && prevId.current !== null) {
+      setSpinning(true);
+      const t = window.setTimeout(() => setSpinning(false), ROULETTE_MS);
+      prevId.current = id;
+      return () => window.clearTimeout(t);
+    }
+    prevId.current = id;
+  }, [activePlayer?.id]);
+
+  const pool = players.length ? players : activePlayer ? [activePlayer] : [];
 
   return (
     <Box
@@ -357,8 +450,11 @@ export default function ActivePlayerCard() {
         alignItems: 'center',
         p: { xs: 2, lg: 1.5 },
         minHeight: 0,
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
+      <AnimatePresence>{spinning && <RouletteOverlay pool={pool} />}</AnimatePresence>
       <AnimatePresence mode="wait">
         {activePlayer ? (
           <ActiveBody

@@ -1,7 +1,8 @@
 'use client';
 
 import { memo, useCallback } from 'react';
-import { Avatar, Box, Typography } from '@mui/material';
+import { Avatar, Box, Button, Typography } from '@mui/material';
+import { Casino } from '@mui/icons-material';
 import { COLORS, ROLE_COLORS_KO, panelSx } from '../constants';
 import type { Player, PlayerStatus } from '../types';
 import { useAuctionContext } from '../AuctionContext';
@@ -111,7 +112,7 @@ const PlayerCell = memo(function PlayerCell({ player, index, canSelect, onSelect
 });
 
 export default function PlayerGrid() {
-  const { players, activePlayer, nextPlayer, waitingCount, selectPlayer } =
+  const { players, activePlayer, nextPlayer, waitingCount, selectPlayer, drawPlayer } =
     useAuctionContext();
   const { user } = useAuth();
   const canSelect = user?.role === 'ADMIN';
@@ -158,16 +159,39 @@ export default function PlayerGrid() {
             경매 대기 명단
           </Typography>
         )}
-        <Typography
-          sx={{
-            fontSize: '0.7rem',
-            fontWeight: 800,
-            color: COLORS.textMuted,
-            fontFamily: 'Pretendard, sans-serif',
-          }}
-        >
-          대기 {waitingCount}명
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {canSelect && (
+            <Button
+              size="small"
+              startIcon={<Casino sx={{ fontSize: '0.95rem' }} />}
+              onClick={() => drawPlayer()}
+              disabled={waitingCount === 0}
+              sx={{
+                py: 0.3,
+                px: 1.1,
+                fontSize: '0.68rem',
+                fontWeight: 900,
+                color: COLORS.textOnAccent,
+                background: COLORS.accent,
+                '& .MuiButton-startIcon': { mr: 0.35 },
+                '&:hover': { background: COLORS.accentSoft },
+                '&.Mui-disabled': { background: COLORS.panelBgMuted, color: COLORS.textMuted },
+              }}
+            >
+              랜덤 추첨
+            </Button>
+          )}
+          <Typography
+            sx={{
+              fontSize: '0.7rem',
+              fontWeight: 800,
+              color: COLORS.textMuted,
+              fontFamily: 'Pretendard, sans-serif',
+            }}
+          >
+            대기 {waitingCount}명
+          </Typography>
+        </Box>
       </Box>
 
       <Box sx={{ flexGrow: 1, overflowY: 'auto', pr: 0.5 }}>

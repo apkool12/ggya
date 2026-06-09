@@ -22,42 +22,42 @@ export const STORAGE_KEYS = {
   shuffleMarker: 'ow_auction_players_shuffled',
 } as const;
 
-// e스포츠 방송 톤 다크 팔레트
+// 러너리그풍 브라운/골드 방송 팔레트
 export const COLORS = {
-  surfaceBg: '#0B0F1A',
-  panelBg: '#141A2A',
-  panelBgStrong: '#1C2436',
-  panelBgMuted: '#2A3348',
-  panelBgElevated: '#1A2133',
+  surfaceBg: '#1A1410',
+  panelBg: '#241B14',
+  panelBgStrong: '#2E2218',
+  panelBgMuted: '#3A2C20',
+  panelBgElevated: '#2A1F17',
 
-  accent: '#6D63FF',
-  accentSoft: '#8B82FF',
-  accentMuted: '#232A42',
+  accent: '#C9962E', // 골드
+  accentSoft: '#E0B252',
+  accentMuted: '#3A2C1A',
 
-  textPrimary: '#EEF2F8',
-  textMuted: '#93A0B8',
-  textOnAccent: '#FFFFFF',
+  textPrimary: '#F4E9DA', // 크림
+  textMuted: '#B49C82', // 토프
+  textOnAccent: '#1A1206', // 골드 위 어두운 텍스트
 
-  danger: '#FF5470',
-  dangerSoft: 'rgba(255, 84, 112, 0.16)',
-  success: '#34D399',
-  successSoft: 'rgba(52, 211, 153, 0.16)',
-  warning: '#FBBF24',
-  warningSoft: 'rgba(251, 191, 36, 0.16)',
-  border: '#28304A',
-  borderStrong: '#3B4760',
-  shadow: '0 20px 50px rgba(0, 0, 0, 0.55)',
-  shadowSoft: '0 10px 26px rgba(0, 0, 0, 0.38)',
+  danger: '#E0613E', // 번트 오렌지
+  dangerSoft: 'rgba(224, 97, 62, 0.16)',
+  success: '#A7B85A', // 올리브 그린
+  successSoft: 'rgba(167, 184, 90, 0.16)',
+  warning: '#E0A53E',
+  warningSoft: 'rgba(224, 165, 62, 0.16)',
+  border: '#3A2C20',
+  borderStrong: '#503C2A',
+  shadow: '0 20px 50px rgba(0, 0, 0, 0.6)',
+  shadowSoft: '0 10px 26px rgba(0, 0, 0, 0.42)',
 
-  highlight: 'rgba(109, 99, 255, 0.18)',
-  highlightStrong: 'rgba(109, 99, 255, 0.55)',
+  highlight: 'rgba(201, 150, 46, 0.18)',
+  highlightStrong: 'rgba(201, 150, 46, 0.55)',
 } as const;
 
-// 역할군별 색 (단색만 쓰지 않도록 포인트 컬러 분리)
+// 역할군별 색 — 브라운 배경에 어울리는 어시 톤, 구분은 유지
 export const ROLE_COLORS: Record<'TANK' | 'DPS' | 'SUPPORT', { main: string; soft: string }> = {
-  TANK: { main: '#38BDF8', soft: 'rgba(56, 189, 248, 0.16)' }, // 시안/블루
-  DPS: { main: '#FB7185', soft: 'rgba(251, 113, 133, 0.16)' }, // 로즈/레드
-  SUPPORT: { main: '#34D399', soft: 'rgba(52, 211, 153, 0.16)' }, // 그린
+  TANK: { main: '#79A6B8', soft: 'rgba(121, 166, 184, 0.18)' }, // 스틸 블루
+  DPS: { main: '#D9774B', soft: 'rgba(217, 119, 75, 0.18)' }, // 테라코타
+  SUPPORT: { main: '#AEBE63', soft: 'rgba(174, 190, 99, 0.18)' }, // 올리브
 };
 
 export const ROLE_COLORS_KO: Record<'탱커' | '딜러' | '힐러', { main: string; soft: string }> = {
@@ -66,8 +66,8 @@ export const ROLE_COLORS_KO: Record<'탱커' | '딜러' | '힐러', { main: stri
   힐러: ROLE_COLORS.SUPPORT,
 };
 
-// 팀 카드 포인트 컬러 (순환)
-export const TEAM_ACCENTS = ['#6D63FF', '#F59E0B', '#22D3EE', '#F472B6', '#34D399', '#A78BFA'] as const;
+// 팀 카드 포인트 컬러 (브라운 톤 안에서 순환)
+export const TEAM_ACCENTS = ['#C9962E', '#D9774B', '#AEBE63', '#C98AA0', '#79A6B8', '#B5853F'] as const;
 
 import type { SxProps, Theme } from '@mui/material/styles';
 

@@ -52,6 +52,19 @@ export async function selectPlayer(playerId: string): Promise<void> {
   await publish();
 }
 
+export async function drawRandomPlayer(): Promise<{ ok: boolean; error?: string }> {
+  const waiting = await prisma.player.findMany({ where: { status: 'WAITING' } });
+  if (waiting.length === 0) {
+    await addLog('🎲 [추첨] 남은 대기 선수가 없습니다.');
+    await publish();
+    return { ok: false, error: '남은 대기 선수가 없습니다.' };
+  }
+  const pick = waiting[Math.floor(Math.random() * waiting.length)];
+  await addLog(`🎲 [랜덤 추첨] ${pick.name} 선수가 추첨되었습니다!`);
+  await selectPlayer(pick.id);
+  return { ok: true };
+}
+
 export async function placeBid(
   teamId: string,
   amount: number,
