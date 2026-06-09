@@ -2,7 +2,7 @@
 
 import { memo, useCallback } from 'react';
 import { Avatar, Box, Typography } from '@mui/material';
-import { COLORS, panelSx } from '../constants';
+import { COLORS, ROLE_COLORS_KO, panelSx } from '../constants';
 import type { Player, PlayerStatus } from '../types';
 import { useAuctionContext } from '../AuctionContext';
 import { useAuth } from '@/auth/AuthContext';
@@ -25,6 +25,7 @@ const PlayerCell = memo(function PlayerCell({ player, index, canSelect, onSelect
   const isLocked = player.status === '낙찰완료' || player.status === '유찰';
   const isActive = player.status === '경매중';
   const clickable = canSelect && !isLocked;
+  const roleColor = ROLE_COLORS_KO[player.role].main;
 
   const handleClick = useCallback(() => {
     if (clickable) onSelect(player.id);
@@ -70,8 +71,8 @@ const PlayerCell = memo(function PlayerCell({ player, index, canSelect, onSelect
         sx={{
           width: 42,
           height: 42,
-          border: `1px solid ${isActive ? COLORS.highlightStrong : COLORS.border}`,
-          boxShadow: '0 2px 8px rgba(17, 24, 39, 0.12)',
+          border: `2px solid ${roleColor}`,
+          boxShadow: isActive ? `0 0 0 2px ${roleColor}` : '0 2px 8px rgba(0, 0, 0, 0.35)',
         }}
       />
       <Typography

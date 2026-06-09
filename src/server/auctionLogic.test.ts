@@ -1,16 +1,16 @@
 import { expect, test } from 'vitest';
-import { findEmptySlot, resolveExpiry, validateBid } from './auctionLogic';
+import { findFreeSlot, resolveExpiry, validateBid } from './auctionLogic';
 
-test('findEmptySlot: 딜러 첫 슬롯', () => {
-  expect(findEmptySlot([], 'DPS')).toBe(1);
-  expect(findEmptySlot([1], 'DPS')).toBe(2);
-  expect(findEmptySlot([1, 2], 'DPS')).toBe(-1);
+test('findFreeSlot: 가장 낮은 빈 슬롯 (역할 무관)', () => {
+  expect(findFreeSlot([])).toBe(0);
+  expect(findFreeSlot([0, 1])).toBe(2);
+  expect(findFreeSlot([0, 1, 2, 3, 4])).toBe(-1);
 });
 
 test('validateBid: 정상 입찰가 증액', () => {
   const r = validateBid({
     phase: 'BIDDING',
-    activePlayerRole: 'DPS',
+    hasActivePlayer: true,
     currentBid: 0,
     amount: 5,
     teamPoints: 1000,
@@ -23,7 +23,7 @@ test('validateBid: 정상 입찰가 증액', () => {
 test('validateBid: 활성 선수 없으면 거절', () => {
   const r = validateBid({
     phase: 'IDLE',
-    activePlayerRole: null,
+    hasActivePlayer: false,
     currentBid: 0,
     amount: 5,
     teamPoints: 1000,
@@ -35,7 +35,7 @@ test('validateBid: 활성 선수 없으면 거절', () => {
 test('validateBid: 포인트 부족 거절', () => {
   const r = validateBid({
     phase: 'BIDDING',
-    activePlayerRole: 'TANK',
+    hasActivePlayer: true,
     currentBid: 900,
     amount: 200,
     teamPoints: 1000,
@@ -44,14 +44,14 @@ test('validateBid: 포인트 부족 거절', () => {
   expect(r.ok).toBe(false);
 });
 
-test('validateBid: 포지션 만석 거절', () => {
+test('validateBid: 로스터 만석 거절', () => {
   const r = validateBid({
     phase: 'BIDDING',
-    activePlayerRole: 'TANK',
+    hasActivePlayer: true,
     currentBid: 0,
     amount: 5,
     teamPoints: 1000,
-    teamOccupiedSlots: [0],
+    teamOccupiedSlots: [0, 1, 2, 3, 4],
   });
   expect(r.ok).toBe(false);
 });

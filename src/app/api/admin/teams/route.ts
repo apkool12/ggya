@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/server/db';
 import { getSession } from '@/server/session';
+import { buildSnapshot } from '@/server/snapshot';
+import { broadcast } from '@/server/sse';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -46,5 +48,6 @@ export async function POST(req: Request) {
       },
     },
   });
+  broadcast(await buildSnapshot());
   return NextResponse.json({ team });
 }

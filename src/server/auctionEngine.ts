@@ -1,5 +1,5 @@
 import { TIMER_INITIAL_SECONDS } from '../auction/constants';
-import { findEmptySlot, resolveExpiry, validateBid } from './auctionLogic';
+import { findFreeSlot, validateBid } from './auctionLogic';
 import { prisma } from './db';
 import { buildSnapshot } from './snapshot';
 import { broadcast } from './sse';
@@ -70,7 +70,7 @@ export async function placeBid(
 
     const v = validateBid({
       phase: state.phase,
-      activePlayerRole: active?.role ?? null,
+      hasActivePlayer: !!active,
       currentBid: state.currentBid,
       amount,
       teamPoints: team.points,
@@ -110,8 +110,8 @@ export async function confirmWin(): Promise<{ ok: boolean; error?: string }> {
     const occupied = team.roster
       .map((r) => r.slotIndex)
       .filter((n): n is number => n != null);
-    const slot = findEmptySlot(occupied, active.role);
-    if (slot === -1) return { ok: false, error: '포지션 만석.' };
+    const slot = findFreeSlot(occupied);
+    if (slot === -1) return { ok: false, error: '로스터가 가득 찼습니다.' };
     if (team.points < state.currentBid) return { ok: false, error: '포인트 부족.' };
 
     await tx.player.update({
@@ -169,17 +169,12 @@ export async function markUnsold(): Promise<void> {
 async function expire(): Promise<void> {
   const state = await prisma.auctionState.findUnique({ where: { id: 1 } });
   if (!state || state.phase !== 'BIDDING') return;
-  const decision = resolveExpiry(Boolean(state.highestBidderTeamId));
-  if (decision === 'UNSOLD') {
-    await markUnsold();
+  if (state.highestBidderTeamId) {
+    // 시간 만료 → 최고 입찰팀에 자동 낙찰
+    await addLog('⏰ [TIME OUT] 시간 만료 — 자동 낙찰 처리합니다.');
+    await confirmWin();
   } else {
-    await prisma.auctionState.update({
-      where: { id: 1 },
-      data: { phase: 'AWAITING_CONFIRM', bidDeadline: null },
-    });
-    clearExpiryTimer();
-    await addLog('⏰ [확정 대기] 시간 만료. 최고 입찰팀 낙찰을 확정하세요.');
-    await publish();
+    await markUnsold();
   }
 }
 

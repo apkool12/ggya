@@ -53,6 +53,22 @@ export const COLORS = {
   highlightStrong: 'rgba(109, 99, 255, 0.55)',
 } as const;
 
+// 역할군별 색 (단색만 쓰지 않도록 포인트 컬러 분리)
+export const ROLE_COLORS: Record<'TANK' | 'DPS' | 'SUPPORT', { main: string; soft: string }> = {
+  TANK: { main: '#38BDF8', soft: 'rgba(56, 189, 248, 0.16)' }, // 시안/블루
+  DPS: { main: '#FB7185', soft: 'rgba(251, 113, 133, 0.16)' }, // 로즈/레드
+  SUPPORT: { main: '#34D399', soft: 'rgba(52, 211, 153, 0.16)' }, // 그린
+};
+
+export const ROLE_COLORS_KO: Record<'탱커' | '딜러' | '힐러', { main: string; soft: string }> = {
+  탱커: ROLE_COLORS.TANK,
+  딜러: ROLE_COLORS.DPS,
+  힐러: ROLE_COLORS.SUPPORT,
+};
+
+// 팀 카드 포인트 컬러 (순환)
+export const TEAM_ACCENTS = ['#6D63FF', '#F59E0B', '#22D3EE', '#F472B6', '#34D399', '#A78BFA'] as const;
+
 import type { SxProps, Theme } from '@mui/material/styles';
 
 export const panelSx: SxProps<Theme> = {

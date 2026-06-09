@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { resetAuction } from '@/server/auctionEngine';
 import { prisma } from '@/server/db';
 import { getSession } from '@/server/session';
+import { buildSnapshot } from '@/server/snapshot';
+import { broadcast } from '@/server/sse';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -42,6 +44,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
       where: { teamId: id },
       data: { passwordHash: await bcrypt.hash(body.leaderPassword, 10) },
     });
+  broadcast(await buildSnapshot());
   return NextResponse.json({ ok: true });
 }
 
@@ -60,5 +63,6 @@ export async function DELETE(req: Request, ctx: Ctx) {
   }
   await prisma.user.deleteMany({ where: { teamId: id } });
   await prisma.team.delete({ where: { id } });
+  broadcast(await buildSnapshot());
   return NextResponse.json({ ok: true });
 }

@@ -3,9 +3,13 @@
 import { Box, Typography } from '@mui/material';
 import { SportsEsports } from '@mui/icons-material';
 import { AnimatePresence, motion } from 'framer-motion';
-import { COLORS } from '../constants';
+import { COLORS, ROLE_COLORS_KO } from '../constants';
 import { getRoleIcon } from '../log-utils';
 import { useAuctionContext } from '../AuctionContext';
+
+type KoRole = '탱커' | '딜러' | '힐러';
+const roleColorOf = (role: string) =>
+  ROLE_COLORS_KO[(role as KoRole) in ROLE_COLORS_KO ? (role as KoRole) : '탱커'];
 
 const ROLE_LABEL: Record<string, string> = {
   탱커: 'TANK',
@@ -157,8 +161,9 @@ function ActiveBody({
                 py: 0.55,
                 width: 'fit-content',
                 borderRadius: 1.5,
-                background: COLORS.panelBgStrong,
-                color: COLORS.textPrimary,
+                background: roleColorOf(activePlayer.role).soft,
+                color: roleColorOf(activePlayer.role).main,
+                border: `1px solid ${roleColorOf(activePlayer.role).main}`,
                 fontSize: '0.72rem',
                 fontWeight: 900,
                 fontFamily: 'Pretendard, sans-serif',
@@ -251,13 +256,13 @@ function ActiveBody({
 
         <Box
           sx={{
-            flex: '0 0 24%',
+            flex: '0 0 38%',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             minWidth: 0,
             gap: 1,
-            pl: 1.5,
+            pl: 1.75,
             borderLeft: `1px solid ${COLORS.border}`,
           }}
         >
@@ -265,43 +270,63 @@ function ActiveBody({
             <Typography
               sx={{
                 fontWeight: 900,
-                fontSize: '0.66rem',
-                color: COLORS.textMuted,
+                fontSize: '0.72rem',
+                color: roleColorOf(activePlayer.role).main,
                 letterSpacing: 1,
-                mb: 0.7,
+                mb: 0.9,
                 fontFamily: 'Pretendard, sans-serif',
               }}
             >
-              선호 픽
+              선호 픽 · MOST 3
             </Typography>
-            <Box sx={{ display: 'flex', gap: 0.65 }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
               {[0, 1, 2].map((idx) => {
                 const url = picks[idx];
                 return (
                   <Box
                     key={idx}
                     sx={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: 1.5,
+                      flex: 1,
+                      aspectRatio: '1 / 1',
+                      maxWidth: 88,
+                      borderRadius: 2,
                       overflow: 'hidden',
                       background: COLORS.panelBgStrong,
-                      border: `1px solid ${COLORS.border}`,
+                      border: `2px solid ${url ? roleColorOf(activePlayer.role).main : COLORS.border}`,
+                      boxShadow: url ? `0 6px 16px ${roleColorOf(activePlayer.role).soft}` : 'none',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      position: 'relative',
                     }}
                   >
                     {url ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={url}
-                        alt=""
-                        loading="lazy"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={url}
+                          alt=""
+                          loading="lazy"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            bottom: 3,
+                            right: 4,
+                            px: 0.5,
+                            borderRadius: 0.8,
+                            background: 'rgba(0,0,0,0.55)',
+                            color: '#fff',
+                            fontSize: '0.55rem',
+                            fontWeight: 800,
+                          }}
+                        >
+                          {idx + 1}
+                        </Box>
+                      </>
                     ) : (
-                      <Typography sx={{ color: COLORS.textMuted, fontWeight: 700 }}>?</Typography>
+                      <Typography sx={{ color: COLORS.textMuted, fontWeight: 800 }}>?</Typography>
                     )}
                   </Box>
                 );

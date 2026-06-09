@@ -2,42 +2,19 @@
 
 import { memo } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
-import { Shield, Bolt, Healing } from '@mui/icons-material';
+import { PersonOutlined } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { COLORS } from '../constants';
-import type { Player, Team, PlayerRole } from '../types';
+import { COLORS, ROLE_COLORS_KO, TEAM_ACCENTS } from '../constants';
+import type { Player, Team } from '../types';
 import { useAuctionContext } from '../AuctionContext';
 
 interface TeamCardProps {
   team: Team;
+  accent: string;
   highlighted: boolean;
-  selectable: boolean;
-  onClick: () => void;
 }
 
-const SLOT_ROLES: PlayerRole[] = ['탱커', '딜러', '딜러', '힐러', '힐러'];
-
-const RosterSlot = memo(function RosterSlot({
-  slot,
-  index,
-}: {
-  slot: Player | null;
-  index: number;
-}) {
-  const role = SLOT_ROLES[index];
-
-  const renderEmptyIcon = () => {
-    const iconSx = { fontSize: '1.1rem', color: COLORS.textMuted };
-    switch (role) {
-      case '탱커':
-        return <Shield sx={iconSx} />;
-      case '딜러':
-        return <Bolt sx={iconSx} />;
-      default:
-        return <Healing sx={iconSx} />;
-    }
-  };
-
+const RosterSlot = memo(function RosterSlot({ slot }: { slot: Player | null }) {
   if (!slot) {
     return (
       <Box
@@ -52,10 +29,12 @@ const RosterSlot = memo(function RosterSlot({
           justifyContent: 'center',
         }}
       >
-        {renderEmptyIcon()}
+        <PersonOutlined sx={{ fontSize: '1.05rem', color: COLORS.textMuted, opacity: 0.5 }} />
       </Box>
     );
   }
+
+  const roleColor = ROLE_COLORS_KO[slot.role].main;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
@@ -71,6 +50,7 @@ const RosterSlot = memo(function RosterSlot({
             aspectRatio: '1/1',
             borderRadius: 2,
             overflow: 'hidden',
+            border: `2px solid ${roleColor}`,
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -102,8 +82,8 @@ const RosterSlot = memo(function RosterSlot({
           sx={{
             display: 'block',
             fontSize: '0.55rem',
-            fontWeight: 600,
-            color: COLORS.textMuted,
+            fontWeight: 700,
+            color: roleColor,
             textAlign: 'center',
             fontFamily: 'Pretendard, sans-serif',
           }}
@@ -115,26 +95,18 @@ const RosterSlot = memo(function RosterSlot({
   );
 });
 
-const TeamCard = memo(function TeamCard({
-  team,
-  highlighted,
-  selectable,
-  onClick,
-}: TeamCardProps) {
+const TeamCard = memo(function TeamCard({ team, accent, highlighted }: TeamCardProps) {
   const displayName = team.name.startsWith('TEAM ') ? team.name.slice(5) : team.name;
 
   return (
     <Box
-      onClick={selectable ? onClick : undefined}
       sx={{
         borderRadius: 3,
         overflow: 'hidden',
         backgroundColor: highlighted ? COLORS.highlight : COLORS.panelBg,
         border: `1px solid ${highlighted ? COLORS.highlightStrong : COLORS.border}`,
-        boxShadow: highlighted ? COLORS.shadowSoft : 'none',
-        cursor: selectable ? 'pointer' : 'default',
-        transition: 'background-color 0.2s, border-color 0.2s, transform 0.2s',
-        '&:hover': selectable ? { backgroundColor: COLORS.highlight, borderColor: COLORS.highlightStrong } : {},
+        boxShadow: highlighted ? `0 0 0 1px ${accent}, ${COLORS.shadowSoft}` : 'none',
+        transition: 'background-color 0.2s, border-color 0.2s',
       }}
     >
       <Box
@@ -146,24 +118,32 @@ const TeamCard = memo(function TeamCard({
           py: 0.9,
           backgroundColor: COLORS.panelBgStrong,
           borderBottom: `1px solid ${COLORS.border}`,
+          borderLeft: `3px solid ${accent}`,
         }}
       >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7, minWidth: 0 }}>
+          <Box sx={{ width: 7, height: 7, borderRadius: '50%', background: accent, flexShrink: 0 }} />
+          <Typography
+            sx={{
+              fontWeight: 800,
+              color: COLORS.textPrimary,
+              fontSize: '0.85rem',
+              fontFamily: 'Pretendard, sans-serif',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {displayName}
+          </Typography>
+        </Box>
         <Typography
           sx={{
             fontWeight: 800,
-            color: COLORS.textPrimary,
-            fontSize: '0.85rem',
+            color: accent,
+            fontSize: '0.78rem',
             fontFamily: 'Pretendard, sans-serif',
-          }}
-        >
-          {displayName}
-        </Typography>
-        <Typography
-          sx={{
-            fontWeight: 700,
-            color: COLORS.textMuted,
-            fontSize: '0.75rem',
-            fontFamily: 'Pretendard, sans-serif',
+            flexShrink: 0,
           }}
         >
           {team.points}P
@@ -174,7 +154,7 @@ const TeamCard = memo(function TeamCard({
         <Grid container spacing={0.8}>
           {team.roster.map((slot, idx) => (
             <Grid size={{ xs: 2.4 }} key={idx}>
-              <RosterSlot slot={slot} index={idx} />
+              <RosterSlot slot={slot} />
             </Grid>
           ))}
         </Grid>
@@ -187,13 +167,12 @@ export default function TeamPanel() {
   const { teams, highestBidder } = useAuctionContext();
   return (
     <>
-      {teams.map((team) => (
+      {teams.map((team, idx) => (
         <TeamCard
           key={team.id}
           team={team}
+          accent={TEAM_ACCENTS[idx % TEAM_ACCENTS.length]}
           highlighted={highestBidder?.id === team.id}
-          selectable={false}
-          onClick={() => {}}
         />
       ))}
     </>
