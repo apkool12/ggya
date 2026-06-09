@@ -4,7 +4,6 @@ import { Box, Typography } from '@mui/material';
 import { SportsEsports } from '@mui/icons-material';
 import { AnimatePresence, motion } from 'framer-motion';
 import { COLORS } from '../constants';
-import { PLAYER_MOST_PICKS } from '../data';
 import { getRoleIcon } from '../log-utils';
 import { useAuctionContext } from '../AuctionContext';
 
@@ -58,17 +57,20 @@ interface ActiveBodyProps {
     name: string;
     role: string;
     avatar: string;
+    mostPicks?: string[];
   };
   currentBid: number;
   highestBidder: { name: string } | null;
+  awaiting: boolean;
 }
 
 function ActiveBody({
   activePlayer,
   currentBid,
   highestBidder,
+  awaiting,
 }: ActiveBodyProps) {
-  const picks = PLAYER_MOST_PICKS[activePlayer.id] ?? [];
+  const picks = activePlayer.mostPicks ?? [];
 
   return (
     <motion.div
@@ -209,15 +211,19 @@ function ActiveBody({
                 px: 1,
                 py: 0.55,
                 borderRadius: 1.5,
-                background: highestBidder ? COLORS.successSoft : COLORS.warningSoft,
-                color: highestBidder ? COLORS.success : COLORS.warning,
+                background: awaiting
+                  ? COLORS.dangerSoft
+                  : highestBidder
+                    ? COLORS.successSoft
+                    : COLORS.warningSoft,
+                color: awaiting ? COLORS.danger : highestBidder ? COLORS.success : COLORS.warning,
                 fontSize: '0.7rem',
                 fontWeight: 900,
                 whiteSpace: 'nowrap',
                 fontFamily: 'Pretendard, sans-serif',
               }}
             >
-              {highestBidder ? '입찰 중' : '팀 선택 대기'}
+              {awaiting ? '낙찰 확정 대기' : highestBidder ? '입찰 중' : '입찰 대기'}
             </Box>
           </Box>
 
@@ -309,7 +315,8 @@ function ActiveBody({
 }
 
 export default function ActivePlayerCard() {
-  const { activePlayer, currentBid, highestBidder } = useAuctionContext();
+  const { activePlayer, currentBid, highestBidder, phase } = useAuctionContext();
+  const awaiting = phase === 'AWAITING_CONFIRM';
 
   return (
     <Box
@@ -333,6 +340,7 @@ export default function ActivePlayerCard() {
             activePlayer={activePlayer}
             currentBid={currentBid}
             highestBidder={highestBidder}
+            awaiting={awaiting}
           />
         ) : (
           <IdleState />

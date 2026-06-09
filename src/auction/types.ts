@@ -8,6 +8,8 @@ export interface Player {
   avatar: string;
   status: PlayerStatus;
   cost?: number;
+  /** 선호 픽 영웅 portrait URL[] (서버 스냅샷에서 제공) */
+  mostPicks?: string[];
 }
 
 export interface Team {
@@ -16,6 +18,7 @@ export interface Team {
   leader: string;
   avatar: string;
   points: number;
+  startingPoints?: number;
   roster: (Player | null)[];
 }
 

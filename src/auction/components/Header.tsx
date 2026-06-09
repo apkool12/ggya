@@ -1,10 +1,12 @@
 'use client';
 
-import type { ChangeEvent } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Box, Button, Typography } from '@mui/material';
 import { FiberManualRecord } from '@mui/icons-material';
 import { COLORS } from '../constants';
 import { useAuctionContext } from '../AuctionContext';
+import { useAuth } from '@/auth/AuthContext';
 
 const chipSx = {
   height: 28,
@@ -16,53 +18,54 @@ const chipSx = {
   borderRadius: 2,
   fontFamily: 'Pretendard, sans-serif',
   '&:hover': { backgroundColor: COLORS.highlight },
-};
+} as const;
+
+const teamLabel = (name: string) => (name.startsWith('TEAM ') ? name.slice(5) : name);
 
 export default function Header() {
-  const { exportJson, importJson, resetAll } = useAuctionContext();
+  const { resetAll, teams } = useAuctionContext();
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
-  const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) importJson(file);
-    event.target.value = '';
+  const myTeam = user?.role === 'LEADER' ? teams.find((t) => t.id === user.teamId) : null;
+
+  const onReset = async () => {
+    if (!window.confirm('모든 경매 현황을 초기 상태로 리셋하시겠습니까?')) return;
+    await resetAll();
+  };
+
+  const onLogout = async () => {
+    await logout();
+    router.refresh();
   };
 
   return (
     <Box
       sx={{
         display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 2,
-          px: { xs: 1.5, md: 2 },
-          py: 1,
-          mb: 1.5,
-          background: COLORS.panelBg,
-          border: `1px solid ${COLORS.border}`,
-          borderRadius: 2,
-          boxShadow: COLORS.shadowSoft,
-          flexWrap: { xs: 'wrap', md: 'nowrap' },
-        }}
-      >
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 2,
+        px: { xs: 1.5, md: 2 },
+        py: 1,
+        mb: 1.5,
+        background: COLORS.panelBg,
+        border: `1px solid ${COLORS.border}`,
+        borderRadius: 2,
+        boxShadow: COLORS.shadowSoft,
+        flexWrap: { xs: 'wrap', md: 'nowrap' },
+      }}
+    >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
         <Typography
           variant="h6"
-          sx={{
-            fontWeight: 900,
-            color: COLORS.textPrimary,
-            fontFamily: 'Pretendard, sans-serif',
-            letterSpacing: 0,
-          }}
+          sx={{ fontWeight: 900, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif' }}
         >
           GGya
         </Typography>
         <Typography
           variant="caption"
-          sx={{
-            fontWeight: 700,
-            color: COLORS.textMuted,
-            fontFamily: 'Pretendard, sans-serif',
-          }}
+          sx={{ fontWeight: 700, color: COLORS.textMuted, fontFamily: 'Pretendard, sans-serif' }}
         >
           E-SPORTS AUCTION
         </Typography>
@@ -83,20 +86,36 @@ export default function Header() {
       </Typography>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
-        <Button size="small" onClick={exportJson} sx={chipSx}>
-          JSON보내기
-        </Button>
-        <Button size="small" component="label" sx={chipSx}>
-          JSON 불러오기
-          <input type="file" accept=".json" hidden onChange={onFileChange} />
-        </Button>
-        <Button
-          size="small"
-          onClick={resetAll}
-          sx={{ ...chipSx, color: COLORS.danger }}
-        >
-          초기화
-        </Button>
+        {user?.role === 'ADMIN' && (
+          <>
+            <Button size="small" component={Link} href="/admin" sx={chipSx}>
+              관리자페이지
+            </Button>
+            <Button size="small" onClick={onReset} sx={{ ...chipSx, color: COLORS.danger }}>
+              초기화
+            </Button>
+          </>
+        )}
+
+        {user ? (
+          <>
+            <Typography
+              variant="caption"
+              sx={{ fontWeight: 700, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif' }}
+            >
+              {user.username}
+              {myTeam ? ` · ${teamLabel(myTeam.name)}` : user.role === 'ADMIN' ? ' · 관리자' : ''}
+            </Typography>
+            <Button size="small" onClick={onLogout} sx={chipSx}>
+              로그아웃
+            </Button>
+          </>
+        ) : (
+          <Button size="small" component={Link} href="/login" sx={chipSx}>
+            로그인
+          </Button>
+        )}
+
         <Typography
           variant="caption"
           sx={{

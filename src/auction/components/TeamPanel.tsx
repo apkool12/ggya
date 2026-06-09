@@ -184,7 +184,7 @@ const TeamCard = memo(function TeamCard({
 });
 
 export default function TeamPanel() {
-  const { teams, activePlayer, highestBidder, setBidder } = useAuctionContext();
+  const { teams, highestBidder } = useAuctionContext();
   return (
     <>
       {teams.map((team) => (
@@ -192,8 +192,8 @@ export default function TeamPanel() {
           key={team.id}
           team={team}
           highlighted={highestBidder?.id === team.id}
-          selectable={!!activePlayer}
-          onClick={() => setBidder(team)}
+          selectable={false}
+          onClick={() => {}}
         />
       ))}
     </>

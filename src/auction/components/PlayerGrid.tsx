@@ -5,11 +5,13 @@ import { Avatar, Box, Typography } from '@mui/material';
 import { COLORS, panelSx } from '../constants';
 import type { Player, PlayerStatus } from '../types';
 import { useAuctionContext } from '../AuctionContext';
+import { useAuth } from '@/auth/AuthContext';
 
 interface PlayerCellProps {
   player: Player;
   index: number;
-  onSelect: (player: Player) => void;
+  canSelect: boolean;
+  onSelect: (id: string) => void;
 }
 
 const CELL_BG: Record<PlayerStatus, string> = {
@@ -19,13 +21,14 @@ const CELL_BG: Record<PlayerStatus, string> = {
   유찰: COLORS.dangerSoft,
 };
 
-const PlayerCell = memo(function PlayerCell({ player, index, onSelect }: PlayerCellProps) {
+const PlayerCell = memo(function PlayerCell({ player, index, canSelect, onSelect }: PlayerCellProps) {
   const isLocked = player.status === '낙찰완료' || player.status === '유찰';
   const isActive = player.status === '경매중';
+  const clickable = canSelect && !isLocked;
 
   const handleClick = useCallback(() => {
-    if (!isLocked) onSelect(player);
-  }, [isLocked, onSelect, player]);
+    if (clickable) onSelect(player.id);
+  }, [clickable, onSelect, player.id]);
 
   return (
     <Box
@@ -42,10 +45,10 @@ const PlayerCell = memo(function PlayerCell({ player, index, onSelect }: PlayerC
         background: isActive ? CELL_BG[player.status] : 'transparent',
         border: `1px solid ${isActive ? COLORS.highlightStrong : 'transparent'}`,
         borderRadius: 1.5,
-        cursor: isLocked ? 'default' : 'pointer',
+        cursor: clickable ? 'pointer' : 'default',
         opacity: isLocked ? 0.5 : 1,
         transition: 'background-color 0.15s',
-        '&:hover': isLocked ? {} : { background: COLORS.highlight },
+        '&:hover': clickable ? { background: COLORS.highlight } : {},
       }}
     >
       <Typography
@@ -109,6 +112,8 @@ const PlayerCell = memo(function PlayerCell({ player, index, onSelect }: PlayerC
 export default function PlayerGrid() {
   const { players, activePlayer, nextPlayer, waitingCount, selectPlayer } =
     useAuctionContext();
+  const { user } = useAuth();
+  const canSelect = user?.role === 'ADMIN';
   const playerRows = Array.from({ length: Math.ceil(players.length / 4) }, (_, rowIndex) =>
     players.slice(rowIndex * 4, rowIndex * 4 + 4),
   );
@@ -194,6 +199,7 @@ export default function PlayerGrid() {
                       <PlayerCell
                         player={player}
                         index={playerIndex}
+                        canSelect={canSelect}
                         onSelect={selectPlayer}
                       />
                     ) : (

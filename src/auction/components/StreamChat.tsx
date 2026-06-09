@@ -1,14 +1,24 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { Chat } from '@mui/icons-material';
-import { COLORS, panelSx } from '../constants';
-import { useAuctionContext } from '../AuctionContext';
+import { CHAT_INTERVAL_MS, COLORS, MAX_CHAT_HISTORY, panelSx } from '../constants';
+import { CHAT_TEMPLATES, INITIAL_CHAT } from '../data';
+import type { ChatMessage } from '../types';
 
+// 채팅은 서버 비범위 — 방송 분위기용 클라이언트 시뮬레이션.
 export default function StreamChat() {
-  const { chat } = useAuctionContext();
+  const [chat, setChat] = useState<ChatMessage[]>(INITIAL_CHAT);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const msg = CHAT_TEMPLATES[Math.floor(Math.random() * CHAT_TEMPLATES.length)];
+      setChat((prev) => [...prev, msg].slice(-MAX_CHAT_HISTORY));
+    }, CHAT_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, []);
 
   useEffect(() => {
     const el = containerRef.current;

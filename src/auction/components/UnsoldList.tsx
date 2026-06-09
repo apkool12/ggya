@@ -3,9 +3,12 @@
 import { Box, Typography } from '@mui/material';
 import { COLORS, panelSx } from '../constants';
 import { useAuctionContext } from '../AuctionContext';
+import { useAuth } from '@/auth/AuthContext';
 
 export default function UnsoldList() {
   const { unsoldPlayers, selectPlayer } = useAuctionContext();
+  const { user } = useAuth();
+  const canSelect = user?.role === 'ADMIN';
 
   return (
     <Box
@@ -89,19 +92,21 @@ export default function UnsoldList() {
                 }}
               >
                 <Box
-                  onClick={() => selectPlayer(player)}
+                  onClick={canSelect ? () => selectPlayer(player.id) : undefined}
                   sx={{
-                    cursor: 'pointer',
+                    cursor: canSelect ? 'pointer' : 'default',
                     fontSize: '0.78rem',
                     fontWeight: 850,
                     color: COLORS.textPrimary,
                     whiteSpace: 'nowrap',
                     fontFamily: 'Pretendard, sans-serif',
-                    '&:hover': {
-                      color: COLORS.danger,
-                      textDecoration: 'underline',
-                      textUnderlineOffset: 3,
-                    },
+                    '&:hover': canSelect
+                      ? {
+                          color: COLORS.danger,
+                          textDecoration: 'underline',
+                          textUnderlineOffset: 3,
+                        }
+                      : {},
                   }}
                 >
                   {player.name}
