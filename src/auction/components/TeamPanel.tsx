@@ -4,13 +4,14 @@ import { memo } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import { PersonOutlined } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { COLORS, ROLE_COLORS_KO, TEAM_ACCENTS } from '../constants';
+import { COLORS, NAMEPLATE_BG, NAMEPLATE_TEXT, ROLE_COLORS_KO, TEAM_ACCENTS } from '../constants';
 import type { Player, Team } from '../types';
 import { useAuctionContext } from '../AuctionContext';
 
 interface TeamCardProps {
   team: Team;
   accent: string;
+  seq: number;
   highlighted: boolean;
 }
 
@@ -60,42 +61,54 @@ const RosterSlot = memo(function RosterSlot({ slot }: { slot: Player | null }) {
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         </Box>
-        <Typography
-          variant="caption"
+        <Box
           sx={{
-            display: 'block',
             mt: 0.4,
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            color: COLORS.textPrimary,
-            textAlign: 'center',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            fontFamily: 'Pretendard, sans-serif',
+            px: 0.4,
+            py: 0.3,
+            borderRadius: 1,
+            background: NAMEPLATE_BG,
+            borderBottom: `2px solid ${roleColor}`,
           }}
         >
-          {slot.name}
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={{
-            display: 'block',
-            fontSize: '0.55rem',
-            fontWeight: 700,
-            color: roleColor,
-            textAlign: 'center',
-            fontFamily: 'Pretendard, sans-serif',
-          }}
-        >
-          {slot.cost}P
-        </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              display: 'block',
+              fontSize: '0.62rem',
+              fontWeight: 800,
+              color: NAMEPLATE_TEXT,
+              textAlign: 'center',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              fontFamily: 'Pretendard, sans-serif',
+              lineHeight: 1.2,
+            }}
+          >
+            {slot.name}
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              display: 'block',
+              fontSize: '0.52rem',
+              fontWeight: 800,
+              color: COLORS.accentSoft,
+              textAlign: 'center',
+              fontFamily: 'Pretendard, sans-serif',
+              lineHeight: 1.1,
+            }}
+          >
+            {slot.cost}P
+          </Typography>
+        </Box>
       </motion.div>
     </Box>
   );
 });
 
-const TeamCard = memo(function TeamCard({ team, accent, highlighted }: TeamCardProps) {
+const TeamCard = memo(function TeamCard({ team, accent, seq, highlighted }: TeamCardProps) {
   const displayName = team.name.startsWith('TEAM ') ? team.name.slice(5) : team.name;
 
   return (
@@ -121,8 +134,27 @@ const TeamCard = memo(function TeamCard({ team, accent, highlighted }: TeamCardP
           borderLeft: `3px solid ${accent}`,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7, minWidth: 0 }}>
-          <Box sx={{ width: 7, height: 7, borderRadius: '50%', background: accent, flexShrink: 0 }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, minWidth: 0 }}>
+          <Box
+            sx={{
+              width: 26,
+              height: 26,
+              flexShrink: 0,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: `linear-gradient(145deg, ${COLORS.accentSoft}, ${accent})`,
+              border: `1.5px solid ${COLORS.accent}`,
+              boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.5)',
+              color: COLORS.textOnAccent,
+              fontWeight: 900,
+              fontSize: '0.7rem',
+              fontFamily: 'Pretendard, sans-serif',
+            }}
+          >
+            {seq}
+          </Box>
           <Typography
             sx={{
               fontWeight: 800,
@@ -171,6 +203,7 @@ export default function TeamPanel() {
         <TeamCard
           key={team.id}
           team={team}
+          seq={idx + 1}
           accent={TEAM_ACCENTS[idx % TEAM_ACCENTS.length]}
           highlighted={highestBidder?.id === team.id}
         />

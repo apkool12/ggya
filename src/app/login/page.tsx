@@ -37,7 +37,7 @@ export default function LoginPage() {
         alignItems: 'center',
         justifyContent: 'center',
         background:
-          'radial-gradient(900px 500px at 50% -10%, rgba(201,150,46,0.2) 0%, rgba(201,150,46,0) 60%), linear-gradient(180deg, #1F1812 0%, #140F0B 100%)',
+          'radial-gradient(900px 500px at 50% -10%, rgba(184,144,47,0.22) 0%, rgba(184,144,47,0) 60%), linear-gradient(180deg, #F3EAD7 0%, #E4D8BF 100%)',
         p: 2,
       }}
     >

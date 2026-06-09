@@ -3,7 +3,7 @@
 import { memo, useCallback } from 'react';
 import { Avatar, Box, Button, Typography } from '@mui/material';
 import { Casino } from '@mui/icons-material';
-import { COLORS, ROLE_COLORS_KO, panelSx } from '../constants';
+import { COLORS, NAMEPLATE_BG, NAMEPLATE_TEXT, ROLE_COLORS_KO, panelSx } from '../constants';
 import type { Player, PlayerStatus } from '../types';
 import { useAuctionContext } from '../AuctionContext';
 import { useAuth } from '@/auth/AuthContext';
@@ -76,22 +76,33 @@ const PlayerCell = memo(function PlayerCell({ player, index, canSelect, onSelect
           boxShadow: isActive ? `0 0 0 2px ${roleColor}` : '0 2px 8px rgba(0, 0, 0, 0.35)',
         }}
       />
-      <Typography
-        variant="caption"
+      <Box
         sx={{
-          fontWeight: 800,
-          color: COLORS.textPrimary,
-          fontSize: '0.68rem',
-          textAlign: 'center',
-          width: '100%',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          fontFamily: 'Pretendard, sans-serif',
+          maxWidth: '100%',
+          px: 0.6,
+          py: 0.2,
+          borderRadius: 0.8,
+          background: isLocked ? 'transparent' : NAMEPLATE_BG,
+          borderBottom: isLocked ? 'none' : `2px solid ${roleColor}`,
         }}
       >
-        {player.name}
-      </Typography>
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 800,
+            color: isLocked ? COLORS.textMuted : NAMEPLATE_TEXT,
+            fontSize: '0.66rem',
+            textAlign: 'center',
+            display: 'block',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            fontFamily: 'Pretendard, sans-serif',
+          }}
+        >
+          {player.name}
+        </Typography>
+      </Box>
       <Typography
         variant="caption"
         sx={{

@@ -74,7 +74,7 @@ function RouletteOverlay({ pool }: { pool: Player[] }) {
         sx={{
           fontWeight: 900,
           fontSize: '1.3rem',
-          color: COLORS.textPrimary,
+          color: '#F4ECDA',
           fontFamily: 'Pretendard, sans-serif',
         }}
       >

@@ -5,7 +5,7 @@ import { COLORS } from '@/auction/constants';
 
 export const theme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
     primary: {
       main: COLORS.accent,
       contrastText: COLORS.textOnAccent,

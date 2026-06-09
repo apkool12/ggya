@@ -28,7 +28,7 @@ export default function AuctionDashboard() {
           minHeight: '100svh',
           height: { xs: 'auto', lg: '100svh' },
           background:
-            'radial-gradient(1200px 600px at 70% -10%, rgba(201,150,46,0.14) 0%, rgba(201,150,46,0) 60%), linear-gradient(180deg, #1F1812 0%, #1A1410 50%, #140F0B 100%)',
+            'radial-gradient(1200px 600px at 70% -10%, rgba(184,144,47,0.16) 0%, rgba(184,144,47,0) 60%), linear-gradient(180deg, #F3EAD7 0%, #ECE3D0 50%, #E4D8BF 100%)',
           overflow: { xs: 'auto', lg: 'hidden' },
           p: { xs: 1, md: 1.5 },
           position: 'relative',

@@ -220,7 +220,7 @@ export default function BiddingConsole() {
               fontWeight: 800,
               background: COLORS.dangerSoft,
               color: COLORS.danger,
-              '&:hover': { background: 'rgba(224, 97, 62, 0.3)' },
+              '&:hover': { background: 'rgba(190, 58, 43, 0.2)' },
               '&.Mui-disabled': { color: COLORS.textMuted, background: COLORS.panelBgMuted },
             }}
           >
@@ -236,9 +236,9 @@ export default function BiddingConsole() {
               height: 40,
               fontWeight: 800,
               background: awaiting ? COLORS.success : COLORS.accent,
-              color: awaiting ? '#1A1206' : COLORS.textOnAccent,
+              color: awaiting ? '#FFFFFF' : COLORS.textOnAccent,
               '& .MuiButton-startIcon': { mr: 0.45 },
-              '&:hover': { background: awaiting ? '#8A9A48' : COLORS.accentSoft },
+              '&:hover': { background: awaiting ? '#4E7A2C' : COLORS.accentSoft },
               '&.Mui-disabled': { background: COLORS.panelBgMuted, color: COLORS.textMuted },
             }}
           >
