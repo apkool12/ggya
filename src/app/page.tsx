@@ -48,7 +48,7 @@ export default function LandingPage() {
           <h1 className={`${s.display} ${s.heroTitle}`}>
             컴퓨터공학과 E-스포츠 대회
           </h1>
-          <p className={`${s.subtitle} ${s.heroSub}`}>GGya</p>
+          <p className={`${s.subtitle} ${s.heroSub}`}>줴줴이야~</p>
           <div className={s.heroActions}>
             <Link href="/auction" className={`${s.pill} ${s.pillDark}`}>경매 입장</Link>
             <a className={s.navLink} href="#programme" style={{ color: 'rgba(255,255,255,0.78)' }}>
