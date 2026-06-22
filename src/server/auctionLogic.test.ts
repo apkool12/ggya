@@ -1,10 +1,10 @@
 import { expect, test } from 'vitest';
 import { findFreeSlot, resolveExpiry, validateBid } from './auctionLogic';
 
-test('findFreeSlot: 가장 낮은 빈 슬롯 (역할 무관)', () => {
-  expect(findFreeSlot([])).toBe(0);
-  expect(findFreeSlot([0, 1])).toBe(2);
-  expect(findFreeSlot([0, 1, 2, 3, 4])).toBe(-1);
+test('findFreeSlot: 슬롯 0은 팀장 예약 → 1번부터 채움', () => {
+  expect(findFreeSlot([])).toBe(1);
+  expect(findFreeSlot([1])).toBe(2);
+  expect(findFreeSlot([1, 2, 3, 4])).toBe(-1);
 });
 
 test('validateBid: 정상 입찰가 증액', () => {

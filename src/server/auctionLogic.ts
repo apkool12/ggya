@@ -1,11 +1,11 @@
 import { MIN_STARTING_BID, ROSTER_SIZE } from '../auction/constants';
 
 /**
- * 역할군 구분 없는 로스터: 0..ROSTER_SIZE-1 중 가장 낮은 빈 슬롯을 반환.
- * 가득 찼으면 -1.
+ * 로스터: 슬롯 0은 팀장 전용으로 예약하고, 낙찰 선수는 1..ROSTER_SIZE-1 중
+ * 가장 낮은 빈 슬롯에 배정한다. 가득 찼으면 -1.
  */
 export function findFreeSlot(occupied: number[]): number {
-  for (let idx = 0; idx < ROSTER_SIZE; idx++) {
+  for (let idx = 1; idx < ROSTER_SIZE; idx++) {
     if (!occupied.includes(idx)) return idx;
   }
   return -1;

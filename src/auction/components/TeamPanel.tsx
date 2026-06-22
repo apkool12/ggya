@@ -119,6 +119,88 @@ const RosterSlot = memo(function RosterSlot({ slot }: { slot: Player | null }) {
   );
 });
 
+const LeaderSlot = memo(function LeaderSlot({ name, avatar }: { name: string; avatar: string }) {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+      <Box sx={{ width: '100%', position: 'relative', overflow: 'visible' }}>
+        {/* 팀장 뱃지 (금색) */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: -8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: COLORS.accent,
+            color: '#2B2620',
+            px: 0.8,
+            py: 0.15,
+            borderRadius: 0,
+            fontSize: '0.6rem',
+            fontWeight: 900,
+            fontFamily: 'Pretendard, sans-serif',
+            zIndex: 3,
+            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)',
+            whiteSpace: 'nowrap',
+            lineHeight: 1.2,
+          }}
+        >
+          팀장
+        </Box>
+        <Box
+          sx={{
+            width: '100%',
+            aspectRatio: '1/1',
+            borderRadius: 0,
+            overflow: 'hidden',
+            border: `1.5px solid ${COLORS.accent}`,
+            background: COLORS.panelBgStrong,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {avatar ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={avatar}
+              alt={name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          ) : (
+            <PersonOutlined sx={{ fontSize: '1.3rem', color: COLORS.accent }} />
+          )}
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          mt: 0.75,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          minWidth: 0,
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            color: COLORS.textPrimary,
+            textAlign: 'center',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            fontFamily: 'Pretendard, sans-serif',
+            lineHeight: 1.2,
+          }}
+        >
+          {name}
+        </Typography>
+      </Box>
+    </Box>
+  );
+});
+
 const TeamCard = memo(function TeamCard({ team, accent, seq, highlighted }: TeamCardProps) {
   const displayName = team.name.startsWith('TEAM ') ? team.name.slice(5) : team.name;
 
@@ -220,7 +302,11 @@ const TeamCard = memo(function TeamCard({ team, accent, seq, highlighted }: Team
         <Grid container spacing={0.8}>
           {team.roster.map((slot, idx) => (
             <Grid size={{ xs: 2.4 }} key={idx}>
-              <RosterSlot slot={slot} />
+              {idx === 0 ? (
+                <LeaderSlot name={team.leader} avatar={team.avatar} />
+              ) : (
+                <RosterSlot slot={slot} />
+              )}
             </Grid>
           ))}
         </Grid>
