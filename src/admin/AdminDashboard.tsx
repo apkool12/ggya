@@ -34,6 +34,8 @@ interface AdminTeam {
   avatarUrl: string;
   startingPoints: number;
   points: number;
+  mostPicks: string[];
+  intro: string;
   leaderAccount: { username: string } | null;
 }
 
@@ -45,6 +47,10 @@ interface FormState {
   startingPoints: number;
   leaderUsername: string;
   leaderPassword: string;
+  intro: string;
+  pick1: string;
+  pick2: string;
+  pick3: string;
 }
 
 const emptyForm: FormState = {
@@ -55,6 +61,10 @@ const emptyForm: FormState = {
   startingPoints: 1000,
   leaderUsername: '',
   leaderPassword: '',
+  intro: '',
+  pick1: '',
+  pick2: '',
+  pick3: '',
 };
 
 interface AdminPlayer {
@@ -278,6 +288,10 @@ export default function AdminDashboard() {
       startingPoints: t.startingPoints,
       leaderUsername: t.leaderAccount?.username ?? '',
       leaderPassword: '',
+      intro: t.intro ?? '',
+      pick1: t.mostPicks?.[0] ?? '',
+      pick2: t.mostPicks?.[1] ?? '',
+      pick3: t.mostPicks?.[2] ?? '',
     });
 
   const save = async () => {
@@ -290,6 +304,8 @@ export default function AdminDashboard() {
       leaderName: form.leaderName,
       avatarUrl: form.avatarUrl,
       startingPoints: Number(form.startingPoints),
+      intro: form.intro,
+      mostPicks: [form.pick1, form.pick2, form.pick3],
     };
     if (!isEdit) {
       body.leaderUsername = form.leaderUsername;
@@ -1443,6 +1459,41 @@ export default function AdminDashboard() {
                 fullWidth
                 sx={inputSx}
               />
+              <TextField
+                label="팀장 한 줄 소개 (추첨 시작 화면에 표시)"
+                value={form?.intro ?? ''}
+                onChange={(e) => setForm((f) => (f ? { ...f, intro: e.target.value } : f))}
+                fullWidth
+                multiline
+                minRows={1}
+                maxRows={3}
+                placeholder="예: 캐리형 트레이서 장인, 한타 지휘관"
+                sx={inputSx}
+              />
+              {(['pick1', 'pick2', 'pick3'] as const).map((key, i) => (
+                <TextField
+                  key={key}
+                  select
+                  label={`팀장 선호 픽 ${i + 1} 영웅`}
+                  value={urlToHeroName(form?.[key] ?? '')}
+                  onChange={(e) =>
+                    setForm((f) => (f ? { ...f, [key]: HERO_IMAGES[e.target.value] ?? e.target.value } : f))
+                  }
+                  fullWidth
+                  sx={inputSx}
+                >
+                  <MenuItem value="">(없음)</MenuItem>
+                  {Object.keys(HERO_IMAGES).map((name) => (
+                    <MenuItem key={name} value={name}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={HERO_IMAGES[name]} alt="" width={20} height={20} style={{ borderRadius: 4 }} />
+                        {name}
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ))}
               <TextField
                 label="시작 포인트"
                 type="number"

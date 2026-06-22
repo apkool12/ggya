@@ -55,6 +55,8 @@ function toTeam(t: SnapTeam): Team {
     avatar: t.avatarUrl,
     points: t.points,
     startingPoints: t.startingPoints,
+    mostPicks: t.mostPicks,
+    intro: t.intro,
     roster: t.roster.map((slot) => (slot ? toPlayer(slot) : null)),
   };
 }

@@ -29,11 +29,16 @@ export async function PATCH(req: Request, ctx: Ctx) {
     avatarUrl?: string;
     startingPoints?: number;
     points?: number;
+    mostPicks?: string[];
+    intro?: string;
   } = {};
   if (body.name !== undefined) data.name = body.name;
   if (body.leaderName !== undefined) data.leaderName = body.leaderName;
   if (body.avatarUrl !== undefined) data.avatarUrl = body.avatarUrl;
   if (body.startingPoints !== undefined) data.startingPoints = body.startingPoints;
+  if (Array.isArray(body.mostPicks))
+    data.mostPicks = body.mostPicks.filter((u: unknown): u is string => typeof u === 'string' && u.length > 0);
+  if (typeof body.intro === 'string') data.intro = body.intro;
   if (body.points !== undefined) {
     data.points = body.points;
   } else if (body.startingPoints !== undefined) {

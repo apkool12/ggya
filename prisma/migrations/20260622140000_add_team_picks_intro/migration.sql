@@ -1,0 +1,3 @@
+-- Team(팀장)에 모스트 픽 + 한 줄 소개 추가
+ALTER TABLE "Team" ADD COLUMN IF NOT EXISTS "mostPicks" TEXT[] DEFAULT ARRAY[]::TEXT[];
+ALTER TABLE "Team" ADD COLUMN IF NOT EXISTS "intro" TEXT NOT NULL DEFAULT '';

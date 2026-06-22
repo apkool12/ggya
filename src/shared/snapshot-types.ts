@@ -27,6 +27,8 @@ export interface SnapTeam {
   avatarUrl: string;
   points: number;
   startingPoints: number;
+  mostPicks: string[];
+  intro: string;
   roster: (SnapPlayer | null)[]; // 길이 5, 슬롯 인덱스 위치
 }
 

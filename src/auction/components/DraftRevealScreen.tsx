@@ -129,7 +129,7 @@ function DraftSlot({ index, player }: DraftSlotProps) {
 }
 
 export default function DraftRevealScreen() {
-  const { players } = useAuctionContext();
+  const { players, teams } = useAuctionContext();
   const { user } = useAuth();
   const isAdmin = user?.role === 'ADMIN';
 
@@ -137,12 +137,36 @@ export default function DraftRevealScreen() {
   const [drawing, setDrawing] = useState(false);
 
   const revealCardRef = useRef<HTMLDivElement>(null);
+  const leaderCardRef = useRef<HTMLDivElement>(null);
 
   // order가 0 이상인 뽑힌 선수들
   const drawnPlayers = players.filter((p) => p.order >= 0).sort((a, b) => a.order - b.order);
   const totalCount = players.length;
   const drawnCount = drawnPlayers.length;
   const isFinished = drawnCount === totalCount && totalCount > 0;
+
+  // 추첨 시작 시 팀장 소개 쇼케이스: 선수 추첨 전(drawnCount === 0)에 팀장들을 하나씩 슥 보여준다
+  const [leaderIdx, setLeaderIdx] = useState(0);
+  const [leaderIntroDone, setLeaderIntroDone] = useState(false);
+  const showLeaderIntro = !leaderIntroDone && drawnCount === 0 && teams.length > 0;
+  const currentLeader = showLeaderIntro ? teams[Math.min(leaderIdx, teams.length - 1)] : null;
+
+  useEffect(() => {
+    if (!showLeaderIntro) return;
+    if (leaderCardRef.current) {
+      gsap.fromTo(
+        leaderCardRef.current,
+        { opacity: 0, x: 48 },
+        { opacity: 1, x: 0, duration: 0.5, ease: 'power2.out', clearProps: 'all' }
+      );
+    }
+    const isLast = leaderIdx >= teams.length - 1;
+    const t = setTimeout(() => {
+      if (isLast) setLeaderIntroDone(true);
+      else setLeaderIdx((i) => i + 1);
+    }, isLast ? 2800 : 2300);
+    return () => clearTimeout(t);
+  }, [showLeaderIntro, leaderIdx, teams.length]);
 
   // 가장 최근에 뽑힌 선수
   const latestDrawnPlayer = drawnPlayers[drawnPlayers.length - 1] ?? null;
@@ -307,7 +331,7 @@ export default function DraftRevealScreen() {
               mb: 0.5,
             }}
           >
-            경매 순서 추첨 진행 중
+            {showLeaderIntro ? '팀장 소개' : '경매 순서 추첨 진행 중'}
           </Typography>
           <Typography
             variant="body1"
@@ -317,7 +341,9 @@ export default function DraftRevealScreen() {
               fontFamily: 'Pretendard, sans-serif',
             }}
           >
-            추첨 완료: {drawnCount} / {totalCount}
+            {showLeaderIntro
+              ? `${Math.min(leaderIdx + 1, teams.length)} / ${teams.length}`
+              : `추첨 완료: ${drawnCount} / ${totalCount}`}
           </Typography>
         </Box>
 
@@ -347,7 +373,76 @@ export default function DraftRevealScreen() {
               overflow: 'hidden',
             }}
           >
-            {displayedPlayer ? (
+            {showLeaderIntro && currentLeader ? (
+              <Box ref={leaderCardRef} sx={{ display: 'flex', width: '100%', gap: 3.5, alignItems: 'center' }}>
+                {/* 좌측: 팀장 사진 + 팀장 뱃지 + 이름 */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 155, flexShrink: 0 }}>
+                  <Box
+                    sx={{
+                      width: 145,
+                      height: 145,
+                      border: '1px solid rgba(43, 38, 32, 0.1)',
+                      backgroundColor: '#FAF9F6',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {currentLeader.avatar ? (
+                      <Avatar src={currentLeader.avatar} variant="square" sx={{ width: '100%', height: '100%', borderRadius: '12px' }} />
+                    ) : (
+                      <Typography sx={{ fontWeight: 950, fontSize: '2.4rem', color: 'rgba(43, 38, 32, 0.18)', fontFamily: 'Pretendard, sans-serif' }}>
+                        {currentLeader.leader?.[0] ?? '?'}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Box sx={{ width: 145, backgroundColor: COLORS.accent, color: '#2B2620', py: 0.4, textAlign: 'center', borderRadius: '8px', mt: 1.25 }}>
+                    <Typography sx={{ fontWeight: 950, fontSize: '0.66rem', fontFamily: 'Pretendard, sans-serif', letterSpacing: 1 }}>
+                      팀장
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ mt: 0.6, fontWeight: 950, fontSize: '1rem', color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif', textAlign: 'center' }}>
+                    {currentLeader.leader}
+                  </Typography>
+                </Box>
+
+                {/* 우측: 팀명 + 한 줄 소개 + MOST PICK */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, pt: 0.5, gap: 1.5 }}>
+                  <Typography sx={{ fontSize: '0.7rem', fontWeight: 900, color: COLORS.textMuted, letterSpacing: 1, fontFamily: 'Pretendard, sans-serif' }}>
+                    {currentLeader.name?.startsWith('TEAM ') ? currentLeader.name.slice(5) : currentLeader.name}
+                  </Typography>
+                  {currentLeader.intro ? (
+                    <Typography sx={{ fontSize: '0.95rem', fontWeight: 800, fontStyle: 'italic', lineHeight: 1.45, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif' }}>
+                      “{currentLeader.intro}”
+                    </Typography>
+                  ) : (
+                    <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: COLORS.textMuted, fontFamily: 'Pretendard, sans-serif' }}>
+                      한 줄 소개가 아직 없습니다.
+                    </Typography>
+                  )}
+                  <Box>
+                    <Typography sx={{ fontSize: '0.68rem', fontWeight: 900, color: COLORS.textMuted, letterSpacing: 1.2, mb: 0.75, fontFamily: 'Pretendard, sans-serif' }}>
+                      MOST PICK
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1.25 }}>
+                      {currentLeader.mostPicks && currentLeader.mostPicks.length > 0 ? (
+                        currentLeader.mostPicks.slice(0, 3).map((url: string, i: number) => (
+                          <Box key={i} sx={{ width: 52, height: 52, border: '1px solid rgba(43, 38, 32, 0.08)', backgroundColor: 'rgba(43, 38, 32, 0.03)', borderRadius: '8px', overflow: 'hidden' }}>
+                            <Avatar src={url} variant="square" sx={{ width: '100%', height: '100%', borderRadius: '8px' }} />
+                          </Box>
+                        ))
+                      ) : (
+                        [0, 1, 2].map((i) => (
+                          <Box key={i} sx={{ width: 52, height: 52, border: '1.5px dashed rgba(43, 38, 32, 0.08)', borderRadius: '8px' }} />
+                        ))
+                      )}
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+            ) : displayedPlayer ? (
               <Box sx={{ display: 'flex', width: '100%', gap: 3.5, alignItems: 'center' }}>
                 {/* 좌측 컬럼: 큰 이미지 + 하단 이름 바 */}
                 <Box
@@ -662,7 +757,27 @@ export default function DraftRevealScreen() {
               mt: 2,
             }}
           >
-            {!isFinished ? (
+            {showLeaderIntro ? (
+              <Button
+                variant="contained"
+                onClick={() => setLeaderIntroDone(true)}
+                endIcon={<ArrowForward />}
+                sx={{
+                  fontWeight: 900,
+                  px: 4,
+                  py: 1.25,
+                  borderRadius: '8px',
+                  fontSize: '0.9rem',
+                  backgroundColor: '#FFFFFF',
+                  color: COLORS.textPrimary,
+                  border: '1px solid rgba(43, 38, 32, 0.15)',
+                  boxShadow: '0 2px 8px rgba(43, 38, 32, 0.04)',
+                  '&:hover': { backgroundColor: '#FAF9F6' },
+                }}
+              >
+                팀장 소개 건너뛰고 추첨 시작
+              </Button>
+            ) : !isFinished ? (
               <Button
                 variant="contained"
                 onClick={onDraw}

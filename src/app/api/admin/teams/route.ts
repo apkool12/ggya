@@ -21,7 +21,7 @@ export async function GET() {
 export async function POST(req: Request) {
   const s = await getSession();
   if (s?.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  const { name, leaderName, avatarUrl, startingPoints, leaderUsername, leaderPassword } =
+  const { name, leaderName, avatarUrl, startingPoints, leaderUsername, leaderPassword, mostPicks, intro } =
     await req.json();
   if (!name || !leaderName || !leaderUsername || !leaderPassword)
     return NextResponse.json({ error: '필수 항목 누락' }, { status: 400 });
@@ -39,6 +39,10 @@ export async function POST(req: Request) {
       startingPoints: points,
       points,
       order: count,
+      mostPicks: Array.isArray(mostPicks)
+        ? mostPicks.filter((u: unknown): u is string => typeof u === 'string' && u.length > 0)
+        : [],
+      intro: typeof intro === 'string' ? intro : '',
       leaderAccount: {
         create: {
           username: leaderUsername,

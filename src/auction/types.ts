@@ -26,6 +26,10 @@ export interface Team {
   avatar: string;
   points: number;
   startingPoints?: number;
+  /** 팀장 선호 픽 영웅 portrait URL[] */
+  mostPicks?: string[];
+  /** 팀장 한 줄 소개 */
+  intro?: string;
   roster: (Player | null)[];
 }
 

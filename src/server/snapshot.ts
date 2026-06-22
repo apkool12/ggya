@@ -67,6 +67,8 @@ export async function buildSnapshot(): Promise<AuctionSnapshot> {
     avatarUrl: t.avatarUrl,
     points: t.points,
     startingPoints: t.startingPoints,
+    mostPicks: t.mostPicks,
+    intro: t.intro,
     roster: buildRoster(t.roster.map(toSnapPlayer)),
   }));
 
