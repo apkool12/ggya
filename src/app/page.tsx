@@ -167,7 +167,7 @@ export default function LandingPage() {
               그럼, 들어가 볼까요.
             </h2>
             <p className={`${s.subtitle} ${s.ctaSub}`}>
-              팀장석에서 질러도 좋고, 관중석에서 구경만 해도 좋고.
+              게임은 게임으로 보는 거. 겜겜봐 하도록 해요.
             </p>
           </div>
           <Link href="/auction" className={`${s.pill} ${s.pillDark}`}>경매 입장</Link>
