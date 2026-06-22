@@ -7,12 +7,8 @@ import {
 import { koToRole } from '../src/shared/roles';
 import { prisma } from '../src/server/db';
 
-/**
- * 초기 데이터를 적재한다. (기존 데이터 삭제는 하지 않음 — 빈 DB 가정)
- * 파괴적 리셋(seed)과 빈-DB-전용 init 양쪽에서 공용으로 쓴다.
- */
-export async function seedData() {
-  // 팀 + 팀장 계정
+/** 팀 + 팀장 계정 적재. (빈 상태 가정 — 삭제하지 않음) */
+export async function seedTeams() {
   for (let i = 0; i < INITIAL_TEAMS.length; i++) {
     const t = INITIAL_TEAMS[i];
     const team = await prisma.team.create({
@@ -34,8 +30,10 @@ export async function seedData() {
       },
     });
   }
+}
 
-  // 선수
+/** 선수 적재. (빈 상태 가정 — 삭제하지 않음) */
+export async function seedPlayers() {
   for (let i = 0; i < INITIAL_PLAYERS.length; i++) {
     const p = INITIAL_PLAYERS[i];
     await prisma.player.create({
@@ -52,16 +50,6 @@ export async function seedData() {
       },
     });
   }
-
-  // 관리자
-  await ensureAdmin();
-
-  // 경매 상태 단일 행
-  await prisma.auctionState.upsert({
-    where: { id: 1 },
-    update: {},
-    create: { id: 1, phase: 'IDLE' },
-  });
 }
 
 /**
@@ -76,4 +64,24 @@ export async function ensureAdmin() {
     update: { passwordHash, role: 'ADMIN' },
     create: { username, passwordHash, role: 'ADMIN' },
   });
+}
+
+/** 경매 상태 단일 행 보장. */
+export async function ensureAuctionState() {
+  await prisma.auctionState.upsert({
+    where: { id: 1 },
+    update: {},
+    create: { id: 1, phase: 'IDLE' },
+  });
+}
+
+/**
+ * 전체 초기 데이터 적재. (기존 데이터 삭제는 하지 않음 — 빈 DB 가정)
+ * 파괴적 리셋(seed)에서 사용.
+ */
+export async function seedData() {
+  await seedTeams();
+  await seedPlayers();
+  await ensureAdmin();
+  await ensureAuctionState();
 }

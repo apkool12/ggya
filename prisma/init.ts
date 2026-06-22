@@ -1,30 +1,45 @@
 import 'dotenv/config';
 import { prisma } from '../src/server/db';
-import { seedData, ensureAdmin } from './seedData';
+import {
+  seedTeams,
+  seedPlayers,
+  ensureAdmin,
+  ensureAuctionState,
+} from './seedData';
 
 /**
- * 배포 시작 시 호출되는 안전한 초기화.
- * - DB가 비어 있을 때만 전체 시드(팀/선수/상태). 데이터가 있으면 건너뜀(비파괴).
- * - 관리자 계정은 항상 보장(upsert)한다 → 어떤 상태에서도 관리자 로그인 가능.
+ * 배포 시작 시 호출되는 안전한 초기화 (자가 치유).
+ * 엔티티별로 "비어 있을 때만" 채운다 → 기존 데이터는 절대 지우지 않으면서,
+ * 부분적으로만 시드된 깨진 상태(예: 팀만 있고 선수 없음)도 자동 복구한다.
  */
 async function main() {
-  const teams = await prisma.team.count();
-  if (teams > 0) {
-    console.log(`[init] 기존 데이터 감지(teams=${teams}) — 전체 시드 건너뜀.`);
-  } else {
-    console.log('[init] 빈 DB 감지 — 초기 시드 실행.');
-    await seedData();
-    console.log('[init] 초기 시드 완료.');
+  const [teams, players] = await Promise.all([
+    prisma.team.count(),
+    prisma.player.count(),
+  ]);
+
+  if (teams === 0) {
+    console.log('[init] 팀 없음 — 팀/팀장 시드.');
+    await seedTeams();
+  }
+  if (players === 0) {
+    console.log('[init] 선수 없음 — 선수 시드.');
+    await seedPlayers();
   }
 
-  // 데이터 유무와 무관하게 관리자 계정 보장
   await ensureAdmin();
-  console.log(`[init] 관리자 계정 보장 완료 (username="${process.env.ADMIN_USERNAME ?? 'admin'}").`);
+  await ensureAuctionState();
+
+  const [t2, p2] = await Promise.all([
+    prisma.team.count(),
+    prisma.player.count(),
+  ]);
+  console.log(`[init] 완료. teams=${t2}, players=${p2}, admin="${process.env.ADMIN_USERNAME ?? 'admin'}".`);
 }
 
 main()
   .catch((e) => {
-    console.error('[init] 시드 실패:', e);
+    console.error('[init] 실패:', e);
     process.exitCode = 1;
   })
   .finally(() => prisma.$disconnect());
