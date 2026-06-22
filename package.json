@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:init": "tsx prisma/init.ts",
     "db:generate": "prisma generate"
   },
   "prisma": {
