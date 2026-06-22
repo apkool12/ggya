@@ -855,7 +855,7 @@ export default function AdminDashboard() {
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
               component={Link}
-              href="/"
+              href="/auction"
               startIcon={<ArrowBack />}
               variant="outlined"
               sx={{

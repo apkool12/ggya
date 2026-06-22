@@ -26,7 +26,7 @@ export default function LoginPage() {
       return;
     }
     const me = await (await fetch('/api/auth/me')).json();
-    router.push(me.user?.role === 'ADMIN' ? '/admin' : '/');
+    router.push(me.user?.role === 'ADMIN' ? '/admin' : '/auction');
   };
 
   return (
@@ -83,7 +83,7 @@ export default function LoginPage() {
         <Button type="submit" variant="contained" size="large" disabled={submitting}>
           {submitting ? '로그인 중…' : '로그인'}
         </Button>
-        <Button component={Link} href="/" size="small" sx={{ alignSelf: 'center' }}>
+        <Button component={Link} href="/auction" size="small" sx={{ alignSelf: 'center' }}>
           ← 경매 화면으로 (관전)
         </Button>
       </Box>
