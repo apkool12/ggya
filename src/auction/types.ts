@@ -15,6 +15,8 @@ export interface Player {
   tankTier: string;
   dpsTier: string;
   supportTier: string;
+  /** 한 줄 소개 (경매 순서 추첨 화면에 노출, 관리자 편집 가능) */
+  intro?: string;
 }
 
 export interface Team {

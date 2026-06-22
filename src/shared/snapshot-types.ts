@@ -17,6 +17,7 @@ export interface SnapPlayer {
   tankTier: string;
   dpsTier: string;
   supportTier: string;
+  intro: string;
 }
 
 export interface SnapTeam {

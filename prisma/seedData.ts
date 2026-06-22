@@ -47,6 +47,7 @@ export async function seedPlayers() {
         tankTier: p.tankTier,
         dpsTier: p.dpsTier,
         supportTier: p.supportTier,
+        intro: p.intro ?? '',
       },
     });
   }

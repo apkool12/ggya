@@ -32,6 +32,7 @@ interface DbPlayer {
   tankTier: string;
   dpsTier: string;
   supportTier: string;
+  intro: string;
 }
 
 const toSnapPlayer = (p: DbPlayer): SnapPlayer => ({
@@ -48,6 +49,7 @@ const toSnapPlayer = (p: DbPlayer): SnapPlayer => ({
   tankTier: p.tankTier,
   dpsTier: p.dpsTier,
   supportTier: p.supportTier,
+  intro: p.intro,
 });
 
 export async function buildSnapshot(): Promise<AuctionSnapshot> {

@@ -25,6 +25,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
     tankTier?: string;
     dpsTier?: string;
     supportTier?: string;
+    intro?: string;
   } = {};
   if (typeof body.name === 'string') data.name = body.name;
   if (typeof body.avatarUrl === 'string') data.avatarUrl = body.avatarUrl;
@@ -35,6 +36,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (typeof body.tankTier === 'string') data.tankTier = body.tankTier;
   if (typeof body.dpsTier === 'string') data.dpsTier = body.dpsTier;
   if (typeof body.supportTier === 'string') data.supportTier = body.supportTier;
+  if (typeof body.intro === 'string') data.intro = body.intro;
 
   await prisma.player.update({ where: { id }, data });
   broadcast(await buildSnapshot());

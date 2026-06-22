@@ -35,6 +35,7 @@ export async function POST(req: Request) {
       tankTier: body.tankTier || '',
       dpsTier: body.dpsTier || '',
       supportTier: body.supportTier || '',
+      intro: typeof body.intro === 'string' ? body.intro : '',
     },
   });
 

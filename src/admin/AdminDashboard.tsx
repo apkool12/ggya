@@ -68,6 +68,7 @@ interface AdminPlayer {
   tankTier: string;
   dpsTier: string;
   supportTier: string;
+  intro: string;
 }
 
 interface PlayerForm {
@@ -82,6 +83,7 @@ interface PlayerForm {
   tankTier: string;
   dpsTier: string;
   supportTier: string;
+  intro: string;
 }
 
 const HERO_IMAGES: Record<string, string> = {
@@ -110,7 +112,7 @@ const HERO_IMAGES: Record<string, string> = {
   벤처: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/a/a0/Icon-Venture.png',
   안란: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/0/07/Icon-Anran.png',
   바스티언: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/5/51/Icon-Bastion.png',
-  캐시디: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/0/05/Icon-Cassidy.png',
+  캐서디: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/0/05/Icon-Cassidy.png',
   에코: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/d/d6/Icon-Echo.png',
   정크랫: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/9/99/Icon-Junkrat.png',
   메이: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/9/99/Icon-Mei.png',
@@ -122,6 +124,7 @@ const HERO_IMAGES: Record<string, string> = {
   프레이야: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/0/04/Icon-Freja.png',
   시에라: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/3/32/Icon-Sierra.png',
   벤데타: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/d/dd/Icon-Vendetta.png',
+  시온: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/7/74/Icon-Shion.png',
   아나: 'https://d15f34w2p8l1cc.cloudfront.net/overwatch/985b06beae46b7ba3ca87d1512d0fc62ca7f206ceca58ef16fc44d43a1cc84ed.png',
   메르시: 'https://d15f34w2p8l1cc.cloudfront.net/overwatch/3bfb8bd8ec827e53d870f1238ab73d8aa1f5dbfbcfaaf7f96ffcd35b5c6102ab.png',
   모이라: 'https://d15f34w2p8l1cc.cloudfront.net/overwatch/f48f8485056d5d00dad195859188d23e50f7126b8b08b5646f46ef1b42f5e1de.png',
@@ -129,11 +132,10 @@ const HERO_IMAGES: Record<string, string> = {
   루시우: 'https://d15f34w2p8l1cc.cloudfront.net/overwatch/040bb13f5123ab93faad2f95627ba184608aef4b2469a4d3003859c7087df044.png',
   키리코: 'https://d15f34w2p8l1cc.cloudfront.net/overwatch/408603fe037e8576078eaac5eab2fb251489ced4003b11f5f522776d43d0b83d.png',
   바티스트: 'https://d15f34w2p8l1cc.cloudfront.net/overwatch/d4e6f1ca45d9f88fa89260787397f141a6f007b14e5b26698883b6a17bab9680.png',
-  일리아리: 'https://d15f34w2p8l1cc.cloudfront.net/overwatch/ce42d1455e03e79f321345fea84b27a8918b5db7ab9b2ca9e569606ede9e4.png',
+  일리아리: 'https://d15f34w2p8l1cc.cloudfront.net/overwatch/ce42d1455e03e79f321345fea84b27a8918b5db8bd7ab9b2ca9e569606ede9e4.png',
   주노: 'https://d15f34w2p8l1cc.cloudfront.net/overwatch/c0167d251e57b0aa2b1e16c37d87f0e7c77263db9dd0503d77b5f2589bf3e4a0.png',
   라이프위버: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/8/86/Icon-Lifeweaver.png',
   '제트팩 캣': 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/1/12/Icon-Jetpack_Cat.png',
-  제트팩캣: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/1/12/Icon-Jetpack_Cat.png',
   미즈키: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/3/36/Icon-Mizuki.png',
   우양: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/6/6c/Icon-Wuyang.png',
   젠야타: 'https://static.wikia.nocookie.net/overwatch_gamepedia/images/f/f7/Icon-Zenyatta.png',
@@ -209,6 +211,7 @@ export default function AdminDashboard() {
       tankTier: p.tankTier ?? '',
       dpsTier: p.dpsTier ?? '',
       supportTier: p.supportTier ?? '',
+      intro: p.intro ?? '',
     });
 
   const openPlayerCreate = () =>
@@ -224,6 +227,7 @@ export default function AdminDashboard() {
       tankTier: '',
       dpsTier: '',
       supportTier: '',
+      intro: '',
     });
 
   const savePlayer = async () => {
@@ -243,6 +247,7 @@ export default function AdminDashboard() {
         tankTier: playerForm.tankTier,
         dpsTier: playerForm.dpsTier,
         supportTier: playerForm.supportTier,
+        intro: playerForm.intro,
       }),
     });
     if (!res.ok) {
@@ -1110,6 +1115,17 @@ export default function AdminDashboard() {
                 value={playerForm?.name ?? ''}
                 onChange={(e) => setPlayerForm((f) => (f ? { ...f, name: e.target.value } : f))}
                 fullWidth
+                sx={inputSx}
+              />
+              <TextField
+                label="한 줄 소개 (추첨 화면에 표시)"
+                value={playerForm?.intro ?? ''}
+                onChange={(e) => setPlayerForm((f) => (f ? { ...f, intro: e.target.value } : f))}
+                fullWidth
+                multiline
+                minRows={1}
+                maxRows={3}
+                placeholder="예: 한타 캐리형 트레이서 장인"
                 sx={inputSx}
               />
               <TextField

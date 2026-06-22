@@ -422,6 +422,22 @@ export default function DraftRevealScreen() {
                     </Box>
                   )}
 
+                  {/* 한 줄 소개 */}
+                  {!isRolling && displayedPlayer.intro && (
+                    <Typography
+                      sx={{
+                        fontSize: '0.95rem',
+                        fontWeight: 800,
+                        fontStyle: 'italic',
+                        lineHeight: 1.45,
+                        color: COLORS.textPrimary,
+                        fontFamily: 'Pretendard, sans-serif',
+                      }}
+                    >
+                      “{displayedPlayer.intro}”
+                    </Typography>
+                  )}
+
                   {/* 포지션별 최대 티어 영역 */}
                   <Box>
                     <Typography

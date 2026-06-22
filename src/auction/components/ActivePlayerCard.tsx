@@ -217,14 +217,14 @@ function ActiveBody({
               <Typography sx={{ fontSize: '0.58rem', fontWeight: 900, color: COLORS.textMuted, fontFamily: 'Pretendard, sans-serif' }}>
                 포지션별 티어
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Typography sx={{ fontSize: '0.66rem', fontWeight: 850, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+                <Typography sx={{ fontSize: '0.66rem', fontWeight: 850, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif', whiteSpace: 'nowrap' }}>
                   탱: {activePlayer.tankTier || '-'}
                 </Typography>
-                <Typography sx={{ fontSize: '0.66rem', fontWeight: 850, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif' }}>
+                <Typography sx={{ fontSize: '0.66rem', fontWeight: 850, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif', whiteSpace: 'nowrap' }}>
                   딜: {activePlayer.dpsTier || '-'}
                 </Typography>
-                <Typography sx={{ fontSize: '0.66rem', fontWeight: 850, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif' }}>
+                <Typography sx={{ fontSize: '0.66rem', fontWeight: 850, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif', whiteSpace: 'nowrap' }}>
                   힐: {activePlayer.supportTier || '-'}
                 </Typography>
               </Box>

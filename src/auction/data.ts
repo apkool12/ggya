@@ -27,6 +27,7 @@ const player = (
   tankTier = "",
   dpsTier = "",
   supportTier = "",
+  intro = "",
 ): Player => ({
   id,
   name,
@@ -37,6 +38,7 @@ const player = (
   tankTier,
   dpsTier,
   supportTier,
+  intro,
 });
 
 // 팀장 5명 = 입찰 주체(경매 대상 선수 목록에는 포함하지 않음). 아바타는 어드민에서 추가.
@@ -120,6 +122,8 @@ const OW = {
     "https://static.wikia.nocookie.net/overwatch_gamepedia/images/3/32/Icon-Sierra.png",
   vendetta:
     "https://static.wikia.nocookie.net/overwatch_gamepedia/images/d/dd/Icon-Vendetta.png",
+  shion:
+    "https://static.wikia.nocookie.net/overwatch_gamepedia/images/7/74/Icon-Shion.png",
   // 힐러
   ana: "https://d15f34w2p8l1cc.cloudfront.net/overwatch/985b06beae46b7ba3ca87d1512d0fc62ca7f206ceca58ef16fc44d43a1cc84ed.png",
   mercy:

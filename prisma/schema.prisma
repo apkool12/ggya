@@ -69,6 +69,7 @@ model Player {
   tankTier    String       @default("")
   dpsTier     String       @default("")
   supportTier String       @default("")
+  intro       String       @default("")
 }
 
 model AuctionState {
