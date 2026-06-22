@@ -54,18 +54,26 @@ export async function seedData() {
   }
 
   // 관리자
-  await prisma.user.create({
-    data: {
-      username: process.env.ADMIN_USERNAME ?? 'admin',
-      passwordHash: await bcrypt.hash(process.env.ADMIN_PASSWORD ?? 'admin1234', 10),
-      role: 'ADMIN',
-    },
-  });
+  await ensureAdmin();
 
   // 경매 상태 단일 행
   await prisma.auctionState.upsert({
     where: { id: 1 },
     update: {},
     create: { id: 1, phase: 'IDLE' },
+  });
+}
+
+/**
+ * 관리자 계정을 보장한다. (없으면 생성, 있으면 비밀번호를 env 값으로 갱신)
+ * 데이터를 지우지 않으므로 매 시작마다 호출해도 안전하다 → 로그인 항상 가능.
+ */
+export async function ensureAdmin() {
+  const username = process.env.ADMIN_USERNAME ?? 'admin';
+  const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD ?? 'admin1234', 10);
+  await prisma.user.upsert({
+    where: { username },
+    update: { passwordHash, role: 'ADMIN' },
+    create: { username, passwordHash, role: 'ADMIN' },
   });
 }
