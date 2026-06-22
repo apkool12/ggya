@@ -39,6 +39,11 @@ function toPlayer(p: SnapPlayer): Player {
     status: STATUS_KO[p.status],
     cost: p.cost ?? undefined,
     mostPicks: p.mostPicks,
+    order: p.order,
+    teamId: p.teamId,
+    tankTier: p.tankTier,
+    dpsTier: p.dpsTier,
+    supportTier: p.supportTier,
   };
 }
 

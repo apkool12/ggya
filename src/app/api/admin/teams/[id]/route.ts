@@ -33,9 +33,11 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (body.name !== undefined) data.name = body.name;
   if (body.leaderName !== undefined) data.leaderName = body.leaderName;
   if (body.avatarUrl !== undefined) data.avatarUrl = body.avatarUrl;
-  if (body.startingPoints !== undefined) {
-    data.startingPoints = body.startingPoints;
-    data.points = body.startingPoints; // 진행 전 가정: 잔여도 시작값으로 맞춤
+  if (body.startingPoints !== undefined) data.startingPoints = body.startingPoints;
+  if (body.points !== undefined) {
+    data.points = body.points;
+  } else if (body.startingPoints !== undefined) {
+    data.points = body.startingPoints;
   }
 
   await prisma.team.update({ where: { id }, data });

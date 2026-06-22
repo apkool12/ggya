@@ -28,6 +28,10 @@ interface DbPlayer {
   teamId: string | null;
   slotIndex: number | null;
   mostPicks: string[];
+  order: number;
+  tankTier: string;
+  dpsTier: string;
+  supportTier: string;
 }
 
 const toSnapPlayer = (p: DbPlayer): SnapPlayer => ({
@@ -40,6 +44,10 @@ const toSnapPlayer = (p: DbPlayer): SnapPlayer => ({
   teamId: p.teamId,
   slotIndex: p.slotIndex,
   mostPicks: p.mostPicks,
+  order: p.order,
+  tankTier: p.tankTier,
+  dpsTier: p.dpsTier,
+  supportTier: p.supportTier,
 });
 
 export async function buildSnapshot(): Promise<AuctionSnapshot> {

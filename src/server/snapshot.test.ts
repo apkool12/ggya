@@ -12,6 +12,10 @@ const mk = (id: string, role: SnapPlayer['role'], slot: number): SnapPlayer => (
   teamId: 't1',
   slotIndex: slot,
   mostPicks: [],
+  order: 0,
+  tankTier: '',
+  dpsTier: '',
+  supportTier: '',
 });
 
 test('buildRoster: 슬롯 인덱스 위치에 배치, 빈칸 null', () => {

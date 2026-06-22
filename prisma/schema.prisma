@@ -28,6 +28,7 @@ enum AuctionPhase {
   IDLE
   BIDDING
   AWAITING_CONFIRM
+  DRAFTING
 }
 
 model User {
@@ -63,8 +64,11 @@ model Player {
   team      Team?        @relation(fields: [teamId], references: [id], onDelete: SetNull)
   teamId    String?
   slotIndex Int?
-  order     Int          @default(0)
-  mostPicks String[]     @default([])
+  order       Int          @default(0)
+  mostPicks   String[]     @default([])
+  tankTier    String       @default("")
+  dpsTier     String       @default("")
+  supportTier String       @default("")
 }
 
 model AuctionState {

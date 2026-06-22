@@ -1,7 +1,7 @@
 import type { PlayerRoleEn } from './roles';
 
 export type PlayerStatusEn = 'WAITING' | 'ACTIVE' | 'SOLD' | 'UNSOLD';
-export type AuctionPhaseEn = 'IDLE' | 'BIDDING' | 'AWAITING_CONFIRM';
+export type AuctionPhaseEn = 'IDLE' | 'BIDDING' | 'AWAITING_CONFIRM' | 'DRAFTING';
 
 export interface SnapPlayer {
   id: string;
@@ -13,6 +13,10 @@ export interface SnapPlayer {
   teamId: string | null;
   slotIndex: number | null;
   mostPicks: string[];
+  order: number;
+  tankTier: string;
+  dpsTier: string;
+  supportTier: string;
 }
 
 export interface SnapTeam {

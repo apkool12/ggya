@@ -49,6 +49,9 @@ async function main() {
         status: 'WAITING',
         order: i,
         mostPicks: [...(PLAYER_MOST_PICKS[p.id] ?? [])],
+        tankTier: p.tankTier,
+        dpsTier: p.dpsTier,
+        supportTier: p.supportTier,
       },
     });
   }

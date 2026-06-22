@@ -24,7 +24,7 @@ export const STORAGE_KEYS = {
 
 // 러너리그풍 라이트 크림/골드 방송 팔레트
 export const COLORS = {
-  surfaceBg: '#ECE3D0', // 따뜻한 파치먼트
+  surfaceBg: '#DDD0B6', // 따뜻한 파치먼트 (한 톤 어둡게 조절)
   panelBg: '#FFFDF8', // 아이보리 화이트
   panelBgStrong: '#F4ECDA', // 라이트 탄
   panelBgMuted: '#E6DAC2',
@@ -44,10 +44,10 @@ export const COLORS = {
   successSoft: 'rgba(94, 140, 54, 0.14)',
   warning: '#C2872A',
   warningSoft: 'rgba(194, 135, 42, 0.14)',
-  border: '#D8C7A4', // 탄/골드 테두리
-  borderStrong: '#C0A463',
-  shadow: '0 16px 40px rgba(120, 92, 40, 0.16)',
-  shadowSoft: '0 8px 22px rgba(120, 92, 40, 0.10)',
+  border: 'rgba(184, 144, 47, 0.10)', // 탄/골드 테두리 (대폭 투명화)
+  borderStrong: 'rgba(184, 144, 47, 0.20)',
+  shadow: '0 12px 32px rgba(43, 38, 32, 0.05)',
+  shadowSoft: '0 4px 16px rgba(43, 38, 32, 0.03)',
 
   highlight: 'rgba(184, 144, 47, 0.16)',
   highlightStrong: 'rgba(184, 144, 47, 0.55)',
@@ -78,19 +78,19 @@ import type { SxProps, Theme } from '@mui/material/styles';
 export const panelSx: SxProps<Theme> = {
   backgroundColor: COLORS.panelBg,
   border: `1px solid ${COLORS.border}`,
-  borderRadius: 2,
+  borderRadius: 3,
   boxShadow: COLORS.shadowSoft,
 };
 
 export const panelStrongSx: SxProps<Theme> = {
   backgroundColor: COLORS.panelBgStrong,
   border: `1px solid ${COLORS.border}`,
-  borderRadius: 2,
+  borderRadius: 3,
 };
 
 export const adPanelSx: SxProps<Theme> = {
   backgroundColor: COLORS.panelBg,
   border: `1px solid ${COLORS.border}`,
-  borderRadius: 2,
+  borderRadius: 3,
   boxShadow: COLORS.shadowSoft,
 };

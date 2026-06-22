@@ -3,21 +3,26 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { Chat } from '@mui/icons-material';
-import { CHAT_INTERVAL_MS, COLORS, MAX_CHAT_HISTORY, panelSx } from '../constants';
-import { CHAT_TEMPLATES, INITIAL_CHAT } from '../data';
+import { COLORS, MAX_CHAT_HISTORY, panelSx } from '../constants';
 import type { ChatMessage } from '../types';
 
-// 채팅은 서버 비범위 — 방송 분위기용 클라이언트 시뮬레이션.
+// 디스코드 채널 메시지를 SSE로 미러링(읽기 전용).
+// 봇 미설정 시 서버가 시뮬레이션 채팅을 흘려보낸다.
 export default function StreamChat() {
-  const [chat, setChat] = useState<ChatMessage[]>(INITIAL_CHAT);
+  const [chat, setChat] = useState<ChatMessage[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const id = window.setInterval(() => {
-      const msg = CHAT_TEMPLATES[Math.floor(Math.random() * CHAT_TEMPLATES.length)];
-      setChat((prev) => [...prev, msg].slice(-MAX_CHAT_HISTORY));
-    }, CHAT_INTERVAL_MS);
-    return () => window.clearInterval(id);
+    const es = new EventSource('/api/chat/stream');
+    es.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data) as ChatMessage;
+        setChat((prev) => [...prev, msg].slice(-MAX_CHAT_HISTORY));
+      } catch {
+        /* ignore malformed frame */
+      }
+    };
+    return () => es.close();
   }, []);
 
   useEffect(() => {
@@ -28,8 +33,9 @@ export default function StreamChat() {
   return (
     <Box
       sx={{
-        p: 1.15,
+        p: 2,
         ...panelSx,
+        borderRadius: 0, // 직사각형화
         display: 'flex',
         flexDirection: 'column',
         minHeight: 0,
@@ -43,7 +49,7 @@ export default function StreamChat() {
           fontSize: '0.76rem',
           pb: 0.65,
           mb: 0.65,
-          borderBottom: `1px solid ${COLORS.border}`,
+          borderBottom: `1px solid rgba(184, 144, 47, 0.08)`,
           display: 'flex',
           alignItems: 'center',
           gap: 0.6,
@@ -62,7 +68,7 @@ export default function StreamChat() {
           <Box key={idx}>
             <Typography
               variant="caption"
-              sx={{ fontWeight: 800, color: COLORS.textPrimary, fontSize: '0.64rem', fontFamily: 'Pretendard, sans-serif' }}
+              sx={{ fontWeight: 800, color: c.color || COLORS.textPrimary, fontSize: '0.64rem', fontFamily: 'Pretendard, sans-serif' }}
             >
               {c.sender}
             </Typography>

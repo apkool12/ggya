@@ -30,11 +30,14 @@ function armExpiryTimer(deadline: Date) {
 }
 
 export async function selectPlayer(playerId: string): Promise<void> {
+  let deadlineToArm: Date | null = null;
   await prisma.$transaction(async (tx) => {
     const player = await tx.player.findUnique({ where: { id: playerId } });
     if (!player || player.status === 'SOLD') return;
     await tx.player.updateMany({ where: { status: 'ACTIVE' }, data: { status: 'WAITING' } });
     await tx.player.update({ where: { id: playerId }, data: { status: 'ACTIVE' } });
+    
+    const deadline = new Date(Date.now() + TIMER_INITIAL_SECONDS * 1000);
     await tx.auctionState.update({
       where: { id: 1 },
       data: {
@@ -42,14 +45,33 @@ export async function selectPlayer(playerId: string): Promise<void> {
         activePlayerId: playerId,
         currentBid: 0,
         highestBidderTeamId: null,
-        bidDeadline: null,
+        bidDeadline: deadline,
       },
     });
+    deadlineToArm = deadline;
   });
-  clearExpiryTimer();
+
+  if (deadlineToArm) {
+    armExpiryTimer(deadlineToArm);
+  } else {
+    clearExpiryTimer();
+  }
+
   const p = await prisma.player.findUnique({ where: { id: playerId } });
   await addLog(`📢 [경매 타겟] ${p?.name} 선수의 경매가 시작되었습니다.`);
   await publish();
+}
+
+export async function startNextPlayer(): Promise<{ ok: boolean; error?: string }> {
+  const nextPlayer = await prisma.player.findFirst({
+    where: { status: 'WAITING' },
+    orderBy: { order: 'asc' },
+  });
+  if (!nextPlayer) {
+    return { ok: false, error: '남은 대기 선수가 없습니다.' };
+  }
+  await selectPlayer(nextPlayer.id);
+  return { ok: true };
 }
 
 export async function drawRandomPlayer(): Promise<{ ok: boolean; error?: string }> {
@@ -72,6 +94,9 @@ export async function placeBid(
   let deadlineToArm: Date | null = null;
   const result = await prisma.$transaction(async (tx): Promise<{ ok: boolean; error?: string }> => {
     const state = await tx.auctionState.findUniqueOrThrow({ where: { id: 1 } });
+    if (state.highestBidderTeamId === teamId) {
+      return { ok: false, error: '이미 최고 입찰자입니다.' };
+    }
     const active = state.activePlayerId
       ? await tx.player.findUnique({ where: { id: state.activePlayerId } })
       : null;
@@ -104,14 +129,17 @@ export async function placeBid(
     armExpiryTimer(deadlineToArm);
     const team = await prisma.team.findUnique({ where: { id: teamId } });
     const state = await prisma.auctionState.findUnique({ where: { id: 1 } });
-    await addLog(`💰 [입찰] ${team?.name} ${state?.currentBid}P로 최고 입찰!`);
+    const active = state?.activePlayerId ? await prisma.player.findUnique({ where: { id: state.activePlayerId } }) : null;
+    const leaderName = team?.leaderName ?? team?.name ?? '팀장';
+    const playerName = active?.name ?? '선수';
+    await addLog(`💰 [입찰] ${leaderName} 팀장 - ${playerName} - ${state?.currentBid}포인트`);
     await publish();
   }
   return result;
 }
 
 export async function confirmWin(): Promise<{ ok: boolean; error?: string }> {
-  const res = await prisma.$transaction(async (tx): Promise<{ ok: boolean; error?: string }> => {
+  const res = await prisma.$transaction(async (tx) => {
     const state = await tx.auctionState.findUniqueOrThrow({ where: { id: 1 } });
     if (!state.activePlayerId || !state.highestBidderTeamId)
       return { ok: false, error: '낙찰 대상/입찰자가 없습니다.' };
@@ -120,6 +148,25 @@ export async function confirmWin(): Promise<{ ok: boolean; error?: string }> {
       where: { id: state.highestBidderTeamId },
       include: { roster: true },
     });
+
+    if (state.currentBid === 0) {
+      await tx.player.update({
+        where: { id: active.id },
+        data: { status: 'UNSOLD' },
+      });
+      await tx.auctionState.update({
+        where: { id: 1 },
+        data: {
+          phase: 'IDLE',
+          activePlayerId: null,
+          currentBid: 0,
+          highestBidderTeamId: null,
+          bidDeadline: null,
+        },
+      });
+      return { ok: true, isUnsold: true, playerName: active.name };
+    }
+
     const occupied = team.roster
       .map((r) => r.slotIndex)
       .filter((n): n is number => n != null);
@@ -145,24 +192,30 @@ export async function confirmWin(): Promise<{ ok: boolean; error?: string }> {
         bidDeadline: null,
       },
     });
-    return { ok: true };
+    return { ok: true, leaderName: team.leaderName, playerName: active.name, cost: state.currentBid };
   });
   if (res.ok) {
     clearExpiryTimer();
-    await addLog('🎉 [낙찰] 낙찰 처리되었습니다.');
+    if (res.isUnsold) {
+      await addLog(`⚠️ [유찰] 입찰자가 없거나 0포인트 낙찰 시도로 인해 ${res.playerName} 선수가 유찰 처리되었습니다.`);
+    } else {
+      await addLog(`🎉 [낙찰] ${res.leaderName} 팀장 - ${res.playerName} - ${res.cost}포인트 낙찰 완료!`);
+    }
     await publish();
+    return { ok: true };
   }
-  return res;
+  return { ok: false, error: res.error };
 }
 
-export async function markUnsold(): Promise<void> {
-  await prisma.$transaction(async (tx) => {
+export async function markUnsold(): Promise<{ ok: boolean; error?: string }> {
+  const res = await prisma.$transaction(async (tx) => {
     const state = await tx.auctionState.findUniqueOrThrow({ where: { id: 1 } });
-    if (state.activePlayerId)
-      await tx.player.update({
-        where: { id: state.activePlayerId },
-        data: { status: 'UNSOLD' },
-      });
+    if (!state.activePlayerId) return { ok: false, error: '유찰할 대상 선수가 없습니다.' };
+    const active = await tx.player.findUniqueOrThrow({ where: { id: state.activePlayerId } });
+    await tx.player.update({
+      where: { id: state.activePlayerId },
+      data: { status: 'UNSOLD' },
+    });
     await tx.auctionState.update({
       where: { id: 1 },
       data: {
@@ -173,16 +226,21 @@ export async function markUnsold(): Promise<void> {
         bidDeadline: null,
       },
     });
+    return { ok: true, playerName: active.name };
   });
-  clearExpiryTimer();
-  await addLog('⚠️ [유찰] 선수가 유찰 처리되었습니다.');
-  await publish();
+  if (res.ok) {
+    clearExpiryTimer();
+    await addLog(`⚠️ [유찰] ${res.playerName} 선수가 유찰 처리되었습니다.`);
+    await publish();
+    return { ok: true };
+  }
+  return { ok: false, error: res.error };
 }
 
 async function expire(): Promise<void> {
   const state = await prisma.auctionState.findUnique({ where: { id: 1 } });
   if (!state || state.phase !== 'BIDDING') return;
-  if (state.highestBidderTeamId) {
+  if (state.highestBidderTeamId && state.currentBid > 0) {
     // 시간 만료 → 최고 입찰팀에 자동 낙찰
     await addLog('⏰ [TIME OUT] 시간 만료 — 자동 낙찰 처리합니다.');
     await confirmWin();
@@ -197,6 +255,14 @@ export async function resetAuction(): Promise<void> {
     await tx.player.updateMany({
       data: { status: 'WAITING', cost: null, teamId: null, slotIndex: null },
     });
+    // Assign a default sequential order to players
+    const allPlayers = await tx.player.findMany({ orderBy: { id: 'asc' } });
+    for (let i = 0; i < allPlayers.length; i++) {
+      await tx.player.update({
+        where: { id: allPlayers[i].id },
+        data: { order: i },
+      });
+    }
     const teams = await tx.team.findMany();
     for (const t of teams)
       await tx.team.update({ where: { id: t.id }, data: { points: t.startingPoints } });
@@ -213,6 +279,59 @@ export async function resetAuction(): Promise<void> {
     await tx.logEntry.deleteMany();
   });
   await addLog('🔄 경매가 초기화되었습니다.');
+  await publish();
+}
+
+export async function startDraftingPhase(): Promise<void> {
+  clearExpiryTimer();
+  await prisma.$transaction(async (tx) => {
+    await tx.player.updateMany({
+      data: { status: 'WAITING', order: -1, cost: null, teamId: null, slotIndex: null },
+    });
+    const teams = await tx.team.findMany();
+    for (const t of teams) {
+      await tx.team.update({ where: { id: t.id }, data: { points: t.startingPoints } });
+    }
+    await tx.auctionState.update({
+      where: { id: 1 },
+      data: {
+        phase: 'DRAFTING',
+        activePlayerId: null,
+        currentBid: 0,
+        highestBidderTeamId: null,
+        bidDeadline: null,
+      },
+    });
+    await tx.logEntry.deleteMany();
+  });
+  await addLog('🎲 경매 순서 추첨(DRAFT) 단계가 시작되었습니다!');
+  await publish();
+}
+
+export async function drawNextDraftPlayer(): Promise<{ ok: boolean; error?: string; player?: any }> {
+  const undrawn = await prisma.player.findMany({ where: { order: -1 } });
+  if (undrawn.length === 0) {
+    return { ok: false, error: '추첨할 대기 선수가 없습니다.' };
+  }
+  const pick = undrawn[Math.floor(Math.random() * undrawn.length)];
+  const nextOrderIndex = await prisma.player.count({ where: { order: { gte: 0 } } });
+
+  const updatedPlayer = await prisma.player.update({
+    where: { id: pick.id },
+    data: { order: nextOrderIndex },
+  });
+
+  await addLog(`🎲 [순서 추첨] ${updatedPlayer.name} 선수가 ${nextOrderIndex + 1}순서로 추첨되었습니다!`);
+  await publish();
+  return { ok: true, player: updatedPlayer };
+}
+
+export async function finishDraftingPhase(): Promise<void> {
+  await prisma.auctionState.update({
+    where: { id: 1 },
+    data: { phase: 'IDLE' },
+  });
+  await addLog('🎮 순서 추첨이 완료되었습니다. 경매를 시작하겠습니다!');
   await publish();
 }
 

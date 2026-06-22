@@ -12,7 +12,7 @@ export function findFreeSlot(occupied: number[]): number {
 }
 
 export interface BidInput {
-  phase: 'IDLE' | 'BIDDING' | 'AWAITING_CONFIRM';
+  phase: 'IDLE' | 'BIDDING' | 'AWAITING_CONFIRM' | 'DRAFTING';
   hasActivePlayer: boolean;
   currentBid: number;
   amount: number;

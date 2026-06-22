@@ -3,7 +3,7 @@
 import { memo, useCallback } from 'react';
 import { Avatar, Box, Button, Typography } from '@mui/material';
 import { Casino } from '@mui/icons-material';
-import { COLORS, NAMEPLATE_BG, NAMEPLATE_TEXT, ROLE_COLORS_KO, panelSx } from '../constants';
+import { COLORS, NAMEPLATE_BG, NAMEPLATE_TEXT, panelSx } from '../constants';
 import type { Player, PlayerStatus } from '../types';
 import { useAuctionContext } from '../AuctionContext';
 import { useAuth } from '@/auth/AuthContext';
@@ -26,7 +26,6 @@ const PlayerCell = memo(function PlayerCell({ player, index, canSelect, onSelect
   const isLocked = player.status === '낙찰완료' || player.status === '유찰';
   const isActive = player.status === '경매중';
   const clickable = canSelect && !isLocked;
-  const roleColor = ROLE_COLORS_KO[player.role].main;
 
   const handleClick = useCallback(() => {
     if (clickable) onSelect(player.id);
@@ -42,11 +41,11 @@ const PlayerCell = memo(function PlayerCell({ player, index, canSelect, onSelect
         alignItems: 'center',
         justifyContent: 'center',
         gap: 0.55,
-        py: 0.45,
+        py: 0.5,
         minHeight: 76,
         background: isActive ? CELL_BG[player.status] : 'transparent',
         border: `1px solid ${isActive ? COLORS.highlightStrong : 'transparent'}`,
-        borderRadius: 1.5,
+        borderRadius: 0, // 직사각형화
         cursor: clickable ? 'pointer' : 'default',
         opacity: isLocked ? 0.5 : 1,
         transition: 'background-color 0.15s',
@@ -68,22 +67,21 @@ const PlayerCell = memo(function PlayerCell({ player, index, canSelect, onSelect
       </Typography>
       <Avatar
         src={player.avatar}
-        variant="rounded"
+        variant="square" // 직사각형화
         sx={{
           width: 42,
           height: 42,
-          border: `2px solid ${roleColor}`,
-          boxShadow: isActive ? `0 0 0 2px ${roleColor}` : '0 2px 8px rgba(0, 0, 0, 0.35)',
+          border: `1.5px solid ${isActive ? COLORS.accent : 'rgba(184, 144, 47, 0.15)'}`,
+          boxShadow: isActive ? `0 0 0 2px ${COLORS.accent}` : '0 2px 6px rgba(0, 0, 0, 0.08)',
         }}
       />
       <Box
         sx={{
-          maxWidth: '100%',
+          width: '84%',
           px: 0.6,
-          py: 0.2,
-          borderRadius: 0.8,
+          py: 0.25,
+          borderRadius: 0, // 직사각형화
           background: isLocked ? 'transparent' : NAMEPLATE_BG,
-          borderBottom: isLocked ? 'none' : `2px solid ${roleColor}`,
         }}
       >
         <Typography
@@ -106,14 +104,14 @@ const PlayerCell = memo(function PlayerCell({ player, index, canSelect, onSelect
       <Typography
         variant="caption"
         sx={{
-          display: 'none',
-          fontSize: '0.5rem',
-          color: isActive ? COLORS.textPrimary : COLORS.textMuted,
-          fontWeight: 700,
+          fontSize: '0.62rem',
+          color: player.status === '낙찰완료' ? COLORS.success : player.status === '유찰' ? COLORS.danger : COLORS.textMuted,
+          fontWeight: 900,
           fontFamily: 'Pretendard, sans-serif',
+          mt: 0.1,
         }}
       >
-        {player.status === '낙찰완료' && `${player.cost}P`}
+        {player.status === '낙찰완료' && player.cost !== undefined && `${player.cost}P`}
         {player.status === '유찰' && '유찰'}
         {player.status === '대기중' && '대기'}
         {isActive && '진행'}
@@ -126,16 +124,21 @@ export default function PlayerGrid() {
   const { players, activePlayer, nextPlayer, waitingCount, selectPlayer, drawPlayer } =
     useAuctionContext();
   const { user } = useAuth();
-  const canSelect = user?.role === 'ADMIN';
-  const playerRows = Array.from({ length: Math.ceil(players.length / 4) }, (_, rowIndex) =>
-    players.slice(rowIndex * 4, rowIndex * 4 + 4),
+  
+  // 메인 화면에서는 실수 클릭을 방지하기 위해 선택 제어 비활성화
+  const canSelect = false;
+
+  const sortedPlayers = [...players].sort((a, b) => a.order - b.order);
+  const playerRows = Array.from({ length: Math.ceil(sortedPlayers.length / 4) }, (_, rowIndex) =>
+    sortedPlayers.slice(rowIndex * 4, rowIndex * 4 + 4),
   );
 
   return (
     <Box
       sx={{
-        p: 1.35,
+        p: 2,
         ...panelSx,
+        borderRadius: 0, // 직사각형화
         display: 'flex',
         flexDirection: 'column',
         minHeight: 0,
@@ -146,7 +149,7 @@ export default function PlayerGrid() {
         sx={{
           pb: 0.9,
           mb: 0.9,
-          borderBottom: `1px solid ${COLORS.border}`,
+          borderBottom: `1px solid rgba(184, 144, 47, 0.08)`,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -180,6 +183,7 @@ export default function PlayerGrid() {
               sx={{
                 py: 0.3,
                 px: 1.1,
+                borderRadius: 0, // 직사각형화
                 fontSize: '0.68rem',
                 fontWeight: 900,
                 color: COLORS.textOnAccent,
@@ -212,13 +216,12 @@ export default function PlayerGrid() {
               key={row.map((player) => player.id).join('-')}
               sx={{
                 display: 'grid',
-                gridTemplateColumns:
-                  'minmax(58px, 1fr) 28px minmax(58px, 1fr) 28px minmax(58px, 1fr) 28px minmax(58px, 1fr)',
+                gridTemplateColumns: 'repeat(4, 1fr)',
                 alignItems: 'center',
                 gap: 0.8,
                 py: 0.65,
                 borderBottom:
-                  rowIndex < playerRows.length - 1 ? `1px solid ${COLORS.border}` : 'none',
+                  rowIndex < playerRows.length - 1 ? `1px solid rgba(184, 144, 47, 0.08)` : 'none',
               }}
             >
               {[0, 1, 2, 3].map((slotIndex) => {
@@ -228,7 +231,7 @@ export default function PlayerGrid() {
                   <Box
                     key={slotIndex}
                     sx={{
-                      display: 'contents',
+                      display: 'block',
                     }}
                   >
                     {player ? (
@@ -240,19 +243,6 @@ export default function PlayerGrid() {
                       />
                     ) : (
                       <Box />
-                    )}
-                    {slotIndex < 3 && row[slotIndex + 1] && (
-                      <Box
-                        sx={{
-                          width: 0,
-                          height: 0,
-                          borderTop: '6px solid transparent',
-                          borderBottom: '6px solid transparent',
-                          borderLeft: `9px solid ${COLORS.accentSoft}`,
-                          opacity: player ? 0.65 : 0,
-                          justifySelf: 'center',
-                        }}
-                      />
                     )}
                   </Box>
                 );

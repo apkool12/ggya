@@ -10,6 +10,11 @@ export interface Player {
   cost?: number;
   /** 선호 픽 영웅 portrait URL[] (서버 스냅샷에서 제공) */
   mostPicks?: string[];
+  order: number;
+  teamId?: string | null;
+  tankTier: string;
+  dpsTier: string;
+  supportTier: string;
 }
 
 export interface Team {

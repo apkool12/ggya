@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { Casino, SportsEsports } from '@mui/icons-material';
 import { AnimatePresence, motion } from 'framer-motion';
-import { COLORS, ROLE_COLORS_KO } from '../constants';
-import { getRoleIcon } from '../log-utils';
+import { COLORS } from '../constants';
 import { useAuctionContext } from '../AuctionContext';
 import type { Player } from '../types';
 
@@ -57,8 +56,8 @@ function RouletteOverlay({ pool }: { pool: Player[] }) {
           height: 96,
           borderRadius: 2,
           overflow: 'hidden',
-          border: `3px solid ${COLORS.accent}`,
-          boxShadow: `0 0 30px ${COLORS.highlightStrong}`,
+          border: `2px solid ${COLORS.accent}`,
+          boxShadow: `0 8px 32px ${COLORS.highlight}`,
         }}
       >
         {p && (
@@ -84,15 +83,7 @@ function RouletteOverlay({ pool }: { pool: Player[] }) {
   );
 }
 
-type KoRole = '탱커' | '딜러' | '힐러';
-const roleColorOf = (role: string) =>
-  ROLE_COLORS_KO[(role as KoRole) in ROLE_COLORS_KO ? (role as KoRole) : '탱커'];
 
-const ROLE_LABEL: Record<string, string> = {
-  탱커: 'TANK',
-  딜러: 'DAMAGE',
-  힐러: 'SUPPORT',
-};
 
 function IdleState() {
   return (
@@ -133,13 +124,7 @@ function IdleState() {
 }
 
 interface ActiveBodyProps {
-  activePlayer: {
-    id: string;
-    name: string;
-    role: string;
-    avatar: string;
-    mostPicks?: string[];
-  };
+  activePlayer: Player;
   currentBid: number;
   highestBidder: { name: string } | null;
   awaiting: boolean;
@@ -168,7 +153,7 @@ function ActiveBody({
         minHeight: 0,
       }}
     >
-      <Box sx={{ display: 'flex', flex: 1, minHeight: 0, gap: 1.5, alignItems: 'stretch' }}>
+      <Box sx={{ display: 'flex', flex: 1, minHeight: 0, gap: 4, alignItems: 'stretch' }}>
         <Box
           sx={{
             flex: '0 0 31%',
@@ -178,8 +163,6 @@ function ActiveBody({
             justifyContent: 'center',
             gap: 1.2,
             minWidth: 0,
-            pr: 1.5,
-            borderRight: `1px solid ${COLORS.border}`,
           }}
         >
           <Box
@@ -190,7 +173,7 @@ function ActiveBody({
               borderRadius: 2,
               overflow: 'hidden',
               background: COLORS.panelBgStrong,
-              border: `1px solid ${COLORS.border}`,
+              border: `1px solid rgba(184, 144, 47, 0.10)`,
               position: 'relative',
             }}
           >
@@ -200,9 +183,6 @@ function ActiveBody({
               alt={activePlayer.name}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
-            <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
-              {getRoleIcon(activePlayer.role as '탱커' | '딜러' | '힐러')}
-            </Box>
           </Box>
           <Box sx={{ minWidth: 0 }}>
             <Typography
@@ -218,8 +198,8 @@ function ActiveBody({
             </Typography>
             <Typography
               sx={{
-                fontWeight: 900,
-                fontSize: '1.12rem',
+                fontWeight: 950,
+                fontSize: '1.25rem',
                 lineHeight: 1.1,
                 color: COLORS.textPrimary,
                 fontFamily: 'Pretendard, sans-serif',
@@ -231,22 +211,23 @@ function ActiveBody({
             >
               {activePlayer.name}
             </Typography>
-            <Box
-              sx={{
-                mt: 0.9,
-                px: 1,
-                py: 0.55,
-                width: 'fit-content',
-                borderRadius: 1.5,
-                background: roleColorOf(activePlayer.role).soft,
-                color: roleColorOf(activePlayer.role).main,
-                border: `1px solid ${roleColorOf(activePlayer.role).main}`,
-                fontSize: '0.72rem',
-                fontWeight: 900,
-                fontFamily: 'Pretendard, sans-serif',
-              }}
-            >
-              {ROLE_LABEL[activePlayer.role] ?? activePlayer.role}
+            
+            {/* 탱/딜/힐 최대 티어 표시 */}
+            <Box sx={{ mt: 1.25, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+              <Typography sx={{ fontSize: '0.58rem', fontWeight: 900, color: COLORS.textMuted, fontFamily: 'Pretendard, sans-serif' }}>
+                포지션별 티어
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Typography sx={{ fontSize: '0.66rem', fontWeight: 850, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif' }}>
+                  탱: {activePlayer.tankTier || '-'}
+                </Typography>
+                <Typography sx={{ fontSize: '0.66rem', fontWeight: 850, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif' }}>
+                  딜: {activePlayer.dpsTier || '-'}
+                </Typography>
+                <Typography sx={{ fontSize: '0.66rem', fontWeight: 850, color: COLORS.textPrimary, fontFamily: 'Pretendard, sans-serif' }}>
+                  힐: {activePlayer.supportTier || '-'}
+                </Typography>
+              </Box>
             </Box>
           </Box>
         </Box>
@@ -258,11 +239,11 @@ function ActiveBody({
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            gap: 0.9,
-            px: 0.25,
+            gap: 1,
+            px: 0.5,
           }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
             <Box sx={{ minWidth: 0 }}>
               <Typography
                 sx={{
@@ -278,7 +259,7 @@ function ActiveBody({
                 sx={{
                   mt: 0.2,
                   fontWeight: 950,
-                  fontSize: '2.36rem',
+                  fontSize: '2.5rem',
                   lineHeight: 1,
                   color: COLORS.textPrimary,
                   fontFamily: 'Pretendard, sans-serif',
@@ -289,36 +270,49 @@ function ActiveBody({
             </Box>
             <Box
               sx={{
-                alignSelf: 'flex-start',
-                px: 1,
-                py: 0.55,
-                borderRadius: 1.5,
-                background: awaiting
-                  ? COLORS.dangerSoft
+                alignSelf: 'center',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.6,
+                color: awaiting
+                  ? COLORS.danger
                   : highestBidder
-                    ? COLORS.successSoft
-                    : COLORS.warningSoft,
-                color: awaiting ? COLORS.danger : highestBidder ? COLORS.success : COLORS.warning,
-                fontSize: '0.7rem',
+                    ? COLORS.success
+                    : COLORS.warning,
+                fontSize: '0.74rem',
                 fontWeight: 900,
                 whiteSpace: 'nowrap',
                 fontFamily: 'Pretendard, sans-serif',
               }}
             >
-              {awaiting ? '낙찰 확정 대기' : highestBidder ? '입찰 중' : '입찰 대기'}
+              <Box
+                sx={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  backgroundColor: awaiting ? COLORS.danger : highestBidder ? COLORS.success : COLORS.warning,
+                  animation: 'bidPulse 1.6s infinite ease-in-out',
+                  '@keyframes bidPulse': {
+                    '0%': { transform: 'scale(0.8)', opacity: 0.5 },
+                    '50%': { transform: 'scale(1.2)', opacity: 1 },
+                    '100%': { transform: 'scale(0.8)', opacity: 0.5 },
+                  },
+                }}
+              />
+              {awaiting ? '낙찰 확정 대기' : highestBidder ? '입찰 진행 중' : '입찰 대기'}
             </Box>
           </Box>
 
           <Box
             sx={{
-              px: 1.1,
-              py: 0.75,
-              borderRadius: 2,
+              px: 1.25,
+              py: 0.85,
+              borderRadius: 2.5,
               background: COLORS.panelBgStrong,
-              border: `1px solid ${COLORS.border}`,
+              border: `1px solid rgba(184, 144, 47, 0.08)`,
               color: highestBidder ? COLORS.textPrimary : COLORS.textMuted,
               fontSize: '0.78rem',
-              fontWeight: 700,
+              fontWeight: 800,
               fontFamily: 'Pretendard, sans-serif',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -339,71 +333,49 @@ function ActiveBody({
             justifyContent: 'center',
             minWidth: 0,
             gap: 1,
-            pl: 1.75,
-            borderLeft: `1px solid ${COLORS.border}`,
           }}
         >
           <Box>
             <Typography
               sx={{
-                fontWeight: 900,
-                fontSize: '0.72rem',
-                color: roleColorOf(activePlayer.role).main,
-                letterSpacing: 1,
-                mb: 0.9,
+                fontWeight: 800,
+                fontSize: '0.68rem',
+                color: COLORS.textMuted,
+                letterSpacing: 0.5,
+                mb: 0.8,
                 fontFamily: 'Pretendard, sans-serif',
               }}
             >
-              선호 픽 · MOST 3
+              MOST PICKS
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', gap: 1.5 }}>
               {[0, 1, 2].map((idx) => {
                 const url = picks[idx];
                 return (
                   <Box
                     key={idx}
                     sx={{
-                      flex: 1,
-                      aspectRatio: '1 / 1',
-                      maxWidth: 88,
-                      borderRadius: 2,
+                      width: 96,
+                      height: 96,
+                      borderRadius: 0,
                       overflow: 'hidden',
                       background: COLORS.panelBgStrong,
-                      border: `2px solid ${url ? roleColorOf(activePlayer.role).main : COLORS.border}`,
-                      boxShadow: url ? `0 6px 16px ${roleColorOf(activePlayer.role).soft}` : 'none',
+                      border: `1.5px solid ${url ? COLORS.accent : 'rgba(184, 144, 47, 0.15)'}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      position: 'relative',
                     }}
                   >
                     {url ? (
-                      <>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={url}
-                          alt=""
-                          loading="lazy"
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            bottom: 3,
-                            right: 4,
-                            px: 0.5,
-                            borderRadius: 0.8,
-                            background: 'rgba(0,0,0,0.55)',
-                            color: '#fff',
-                            fontSize: '0.55rem',
-                            fontWeight: 800,
-                          }}
-                        >
-                          {idx + 1}
-                        </Box>
-                      </>
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={url}
+                        alt=""
+                        loading="lazy"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
                     ) : (
-                      <Typography sx={{ color: COLORS.textMuted, fontWeight: 800 }}>?</Typography>
+                      <Typography sx={{ color: COLORS.textMuted, fontWeight: 800, fontSize: '0.75rem' }}>?</Typography>
                     )}
                   </Box>
                 );
@@ -442,13 +414,13 @@ export default function ActivePlayerCard() {
         flexGrow: 1,
         background: COLORS.panelBg,
         border: `1px solid ${COLORS.border}`,
-        borderRadius: 2,
+        borderRadius: 3,
         boxShadow: COLORS.shadowSoft,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        p: { xs: 2, lg: 1.5 },
+        p: 2.25,
         minHeight: 0,
         position: 'relative',
         overflow: 'hidden',

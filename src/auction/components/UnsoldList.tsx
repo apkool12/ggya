@@ -13,9 +13,9 @@ export default function UnsoldList() {
   return (
     <Box
       sx={{
-        px: 1.25,
-        py: 1,
+        p: 1.75,
         ...panelSx,
+        borderRadius: 0, // 직사각형화
         minHeight: 0,
         display: 'flex',
         flexDirection: 'row',
@@ -66,8 +66,8 @@ export default function UnsoldList() {
           alignItems: 'center',
           overflowX: 'auto',
           overflowY: 'hidden',
-          borderLeft: `1px solid ${COLORS.border}`,
-          pl: 1.1,
+          borderLeft: `1px solid rgba(184, 144, 47, 0.08)`,
+          pl: 1.5,
         }}
       >
         {unsoldPlayers.length > 0 ? (
@@ -112,35 +112,17 @@ export default function UnsoldList() {
                   {player.name}
                 </Box>
                 {idx < unsoldPlayers.length - 1 && (
-                  <Box
+                  <Typography
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.2,
-                      color: COLORS.textMuted,
+                      color: 'rgba(133, 120, 89, 0.4)',
+                      fontWeight: 900,
+                      fontSize: '0.8rem',
+                      mx: 0.2,
+                      userSelect: 'none',
                     }}
                   >
-                    <Box
-                      sx={{
-                        width: 0,
-                        height: 0,
-                        borderTop: '5px solid transparent',
-                        borderBottom: '5px solid transparent',
-                        borderLeft: `7px solid ${COLORS.textMuted}`,
-                        opacity: 0.6,
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        width: 0,
-                        height: 0,
-                        borderTop: '5px solid transparent',
-                        borderBottom: '5px solid transparent',
-                        borderLeft: `7px solid ${COLORS.textMuted}`,
-                        opacity: 0.35,
-                      }}
-                    />
-                  </Box>
+                    ·
+                  </Typography>
                 )}
               </Box>
             ))}

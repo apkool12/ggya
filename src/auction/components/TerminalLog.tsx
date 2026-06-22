@@ -8,7 +8,7 @@ import { renderLogWithIcon } from '../log-utils';
 import { useAuctionContext } from '../AuctionContext';
 
 export default function TerminalLog() {
-  const { logs } = useAuctionContext();
+  const { logs, teams } = useAuctionContext();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -17,15 +17,15 @@ export default function TerminalLog() {
   }, [logs]);
 
   return (
-    <Box sx={{ minHeight: 0, p: 1.1, display: 'flex', flexDirection: 'column', overflow: 'hidden', ...panelSx }}>
+    <Box sx={{ minHeight: 0, p: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden', ...panelSx }}>
       <Typography
         sx={{
           fontWeight: 800,
           color: COLORS.textMuted,
           fontSize: '0.68rem',
-          pb: 0.5,
-          mb: 0.5,
-          borderBottom: `1px solid ${COLORS.border}`,
+          pb: 0.65,
+          mb: 0.65,
+          borderBottom: `1px solid rgba(184, 144, 47, 0.08)`,
           display: 'flex',
           alignItems: 'center',
           gap: 0.6,
@@ -37,14 +37,14 @@ export default function TerminalLog() {
       </Typography>
       <Box
         ref={containerRef}
-        sx={{ flexGrow: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 0.3 }}
+        sx={{ flexGrow: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 0.45 }}
       >
         {logs.map((log, idx) => (
           <Box
             key={idx}
-            sx={{ fontSize: '0.7rem', color: COLORS.textPrimary, lineHeight: 1.35, fontFamily: 'Pretendard, monospace, sans-serif' }}
+            sx={{ fontSize: '0.85rem', color: COLORS.textPrimary, lineHeight: 1.4, fontFamily: 'Pretendard, sans-serif' }}
           >
-            {renderLogWithIcon(log)}
+            {renderLogWithIcon(log, teams)}
           </Box>
         ))}
       </Box>
