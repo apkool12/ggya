@@ -44,14 +44,11 @@ export default function LandingPage() {
       {/* hero */}
       <section className={s.hero}>
         <div className={`${s.container} ${s.heroInner}`}>
-          <p className={`${s.eyebrow} ${s.heroEyebrow}`}>GGya · 컴퓨터공학과 오버워치 경매</p>
+          <p className={`${s.eyebrow} ${s.heroEyebrow}`}>컴퓨터공학과 오버워치 경매</p>
           <h1 className={`${s.display} ${s.heroTitle}`}>
-            선수 스무 명, 팀은 다섯.
+            컴퓨터공학과 E-스포츠 대회
           </h1>
-          <p className={`${s.subtitle} ${s.heroSub}`}>
-            한 명씩 호명하면 팀들이 포인트로 값을 부릅니다. 제일 세게 지른 팀이 데려가요.
-            다들 천 포인트로 출발합니다.
-          </p>
+          <p className={`${s.subtitle} ${s.heroSub}`}>GGya</p>
           <div className={s.heroActions}>
             <Link href="/auction" className={`${s.pill} ${s.pillDark}`}>경매 입장</Link>
             <a className={s.navLink} href="#programme" style={{ color: 'rgba(255,255,255,0.78)' }}>

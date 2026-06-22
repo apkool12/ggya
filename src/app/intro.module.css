@@ -110,8 +110,20 @@
   max-width: 920px;
 }
 .heroEyebrow { color: rgba(255,255,255,0.6); }
-.heroTitle { color: var(--on-primary); margin-top: 22px; max-width: 14ch; }
-.heroSub { color: rgba(255,255,255,0.72); margin-top: 26px; max-width: 46ch; }
+.heroTitle {
+  color: var(--on-primary);
+  margin-top: 22px;
+  max-width: 22ch;
+  word-break: keep-all;       /* 한글 단어 중간에서 안 끊김 */
+  overflow-wrap: break-word;  /* 넘칠 때만 안전하게 줄바꿈 */
+}
+.heroSub {
+  color: rgba(255,255,255,0.72);
+  margin-top: 26px;
+  max-width: 46ch;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
 .heroActions { margin-top: 40px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 .heroMeta {
   margin-top: 64px; padding-top: 22px;
