@@ -237,6 +237,48 @@ export async function markUnsold(): Promise<{ ok: boolean; error?: string }> {
   return { ok: false, error: res.error };
 }
 
+/**
+ * 유찰 선수 자동 배정: 포인트가 0인(=더 입찰 불가) 팀의 빈 자리에만 유찰 선수를 무료(0P)로 채운다.
+ * 빈 자리가 많은(선수 적은) 팀을 우선하고, 동률이면 랜덤. 포인트가 남은 팀은 대상에서 제외.
+ */
+export async function autoFillUnsold(): Promise<{ ok: boolean; error?: string; filled?: number }> {
+  let filled = 0;
+  await prisma.$transaction(async (tx) => {
+    const unsold = await tx.player.findMany({ where: { status: 'UNSOLD' }, orderBy: { order: 'asc' } });
+    if (unsold.length === 0) return;
+
+    const teams = await tx.team.findMany({ include: { roster: true } });
+    // 포인트 0 + 빈 자리 있는 팀만 후보 (occupied 슬롯을 가변으로 추적)
+    const pool = teams
+      .filter((t) => t.points === 0)
+      .map((t) => ({
+        id: t.id,
+        occupied: t.roster.map((r) => r.slotIndex).filter((n): n is number => n != null),
+      }));
+
+    for (const player of unsold) {
+      const avail = pool.filter((t) => findFreeSlot(t.occupied) !== -1);
+      if (avail.length === 0) break;
+      // 빈 자리 많은(occupied 적은) 팀 우선, 동률 랜덤
+      const minOccupied = Math.min(...avail.map((t) => t.occupied.length));
+      const candidates = avail.filter((t) => t.occupied.length === minOccupied);
+      const target = candidates[Math.floor(Math.random() * candidates.length)];
+      const slot = findFreeSlot(target.occupied);
+      await tx.player.update({
+        where: { id: player.id },
+        data: { status: 'SOLD', cost: 0, teamId: target.id, slotIndex: slot },
+      });
+      target.occupied.push(slot);
+      filled++;
+    }
+  });
+  if (filled > 0) {
+    await addLog(`🧩 [유찰 자동 배정] 0포인트 팀의 빈 자리에 유찰 선수 ${filled}명을 무료 배정했습니다.`);
+    await publish();
+  }
+  return { ok: true, filled };
+}
+
 async function expire(): Promise<void> {
   const state = await prisma.auctionState.findUnique({ where: { id: 1 } });
   if (!state || state.phase !== 'BIDDING') return;

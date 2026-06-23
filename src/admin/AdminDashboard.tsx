@@ -463,6 +463,18 @@ export default function AdminDashboard() {
     }
   };
 
+  const autoFillUnsold = async () => {
+    if (!window.confirm('유찰 선수를 0포인트 팀의 빈 자리에 무료로 자동 배정할까요?')) return;
+    const res = await fetch('/api/auction/autofill', { method: 'POST' });
+    if (!res.ok) {
+      await handleApiError(res, '유찰 자동 배정 실패');
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setToast(`유찰 자동 배정 완료: ${data.filled ?? 0}명 배정`);
+      await fetchPlayers();
+    }
+  };
+
   const startDrafting = async () => {
     if (!window.confirm('기존 순서와 낙찰 내역을 초기화하고 순서 추첨(DRAFT)을 시작하시겠습니까?')) return;
     const res = await fetch('/api/auction/draft/start', { method: 'POST' });
@@ -909,6 +921,25 @@ export default function AdminDashboard() {
                     낙찰 확정
                   </Button>
                 </Box>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  onClick={autoFillUnsold}
+                  sx={{
+                    fontWeight: 900,
+                    height: 36,
+                    borderRadius: '8px',
+                    borderColor: 'rgba(122, 78, 134, 0.35)',
+                    color: '#7A4E86',
+                    background: '#FFFFFF',
+                    '&:hover': {
+                      background: 'rgba(122, 78, 134, 0.08)',
+                      borderColor: 'rgba(122, 78, 134, 0.6)',
+                    },
+                  }}
+                >
+                  유찰 선수 자동 배정 (0P 팀 빈자리)
+                </Button>
                 <Box sx={{ display: 'flex', gap: 1.25 }}>
                   <Button
                     variant="outlined"
