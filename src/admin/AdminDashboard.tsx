@@ -23,7 +23,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { Add, ArrowBack, Delete, Edit, PlayArrow, Check, Block, Refresh, Casino } from '@mui/icons-material';
+import { Add, ArrowBack, Delete, Edit, PlayArrow, Check, Block, Refresh, Casino, CloudUpload } from '@mui/icons-material';
 import { roleToKo, type PlayerRoleEn } from '@/shared/roles';
 import { COLORS } from '@/auction/constants';
 
@@ -155,6 +155,107 @@ const urlToHeroName = (url: string): string => {
   const match = Object.entries(HERO_IMAGES).find(([_, u]) => u === url);
   return match ? match[0] : url;
 };
+
+/**
+ * 업로드한 이미지를 브라우저에서 정사각형으로 크롭·축소해 JPEG data URL로 변환한다.
+ * 외부 스토리지 없이 DB(avatarUrl)에 그대로 저장 — 작은 썸네일이라 용량 부담이 적다.
+ */
+async function fileToDataUrl(file: File, size = 256, quality = 0.82): Promise<string> {
+  const readAsDataUrl = (f: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('파일을 읽지 못했습니다.'));
+      reader.readAsDataURL(f);
+    });
+  const src = await readAsDataUrl(file);
+  const img = document.createElement('img');
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error('이미지를 불러오지 못했습니다.'));
+    img.src = src;
+  });
+  // 중앙 정사각형 크롭 후 size×size 로 축소
+  const side = Math.min(img.width, img.height);
+  const sx = (img.width - side) / 2;
+  const sy = (img.height - side) / 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return src;
+  ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+  return canvas.toDataURL('image/jpeg', quality);
+}
+
+/** URL 입력 + 파일 업로드(자동 압축) + 미리보기를 묶은 아바타 입력 필드 */
+function AvatarUploadField({
+  label,
+  value,
+  onChange,
+  onError,
+}: {
+  label: string;
+  value: string;
+  onChange: (url: string) => void;
+  onError?: (msg: string) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+      <Box
+        sx={{
+          width: 56,
+          height: 56,
+          flexShrink: 0,
+          borderRadius: '8px',
+          overflow: 'hidden',
+          border: '1px solid rgba(0,0,0,0.12)',
+          backgroundColor: 'rgba(0,0,0,0.03)',
+        }}
+      >
+        {value ? <Avatar src={value} variant="square" sx={{ width: '100%', height: '100%' }} /> : null}
+      </Box>
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <TextField
+          label={label}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          fullWidth
+          sx={inputSx}
+        />
+        <Button
+          component="label"
+          variant="outlined"
+          size="small"
+          startIcon={<CloudUpload />}
+          disabled={busy}
+          sx={{ alignSelf: 'flex-start', fontWeight: 800, borderRadius: '8px' }}
+        >
+          {busy ? '업로드 중…' : '이미지 파일 업로드'}
+          <input
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              if (!file) return;
+              setBusy(true);
+              try {
+                onChange(await fileToDataUrl(file));
+              } catch (err) {
+                onError?.(err instanceof Error ? err.message : '업로드 실패');
+              } finally {
+                setBusy(false);
+              }
+            }}
+          />
+        </Button>
+      </Box>
+    </Box>
+  );
+}
 
 const ROLE_OPTIONS: PlayerRoleEn[] = ['TANK', 'DPS', 'SUPPORT'];
 
@@ -1160,12 +1261,11 @@ export default function AdminDashboard() {
                   </MenuItem>
                 ))}
               </TextField>
-              <TextField
+              <AvatarUploadField
                 label="프로필 이미지 URL"
                 value={playerForm?.avatarUrl ?? ''}
-                onChange={(e) => setPlayerForm((f) => (f ? { ...f, avatarUrl: e.target.value } : f))}
-                fullWidth
-                sx={inputSx}
+                onChange={(url) => setPlayerForm((f) => (f ? { ...f, avatarUrl: url } : f))}
+                onError={setToast}
               />
               <TextField
                 select
@@ -1452,12 +1552,11 @@ export default function AdminDashboard() {
                 fullWidth
                 sx={inputSx}
               />
-              <TextField
+              <AvatarUploadField
                 label="아바타 이미지 URL"
                 value={form?.avatarUrl ?? ''}
-                onChange={(e) => setForm((f) => (f ? { ...f, avatarUrl: e.target.value } : f))}
-                fullWidth
-                sx={inputSx}
+                onChange={(url) => setForm((f) => (f ? { ...f, avatarUrl: url } : f))}
+                onError={setToast}
               />
               <TextField
                 label="팀장 한 줄 소개 (추첨 시작 화면에 표시)"
