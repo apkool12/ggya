@@ -243,6 +243,24 @@ function ActiveBody({
             px: 0.5,
           }}
         >
+          {activePlayer.intro && (
+            <Typography
+              sx={{
+                fontSize: '0.82rem',
+                fontStyle: 'italic',
+                fontWeight: 800,
+                lineHeight: 1.35,
+                color: COLORS.textPrimary,
+                fontFamily: 'Pretendard, sans-serif',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              “{activePlayer.intro}”
+            </Typography>
+          )}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
             <Box sx={{ minWidth: 0 }}>
               <Typography
